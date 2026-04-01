@@ -1,0 +1,129 @@
+---
+title: QuickNode Setup
+description: Configure QuickNode endpoints for Solana and Arbitrum.
+---
+
+# QuickNode Setup
+
+This guide walks you through setting up QuickNode endpoints for SolarPlex MCP.
+
+## Why QuickNode?
+
+QuickNode provides:
+- **Low-latency RPC** - Fast chain interaction
+- **Multi-chain support** - Solana + EVM
+- **Streams** - Real-time event indexing
+- **Key-Value Store** - Tier management
+- **IPFS** - Proposal storage
+
+## Step 1: Create Account
+
+1. Go to [quicknode.com](https://quicknode.com)
+2. Sign up for an account
+3. Choose your plan (Build plan recommended)
+
+## Step 2: Create Solana Endpoint
+
+1. Click "Create Endpoint"
+2. Select "Solana"
+3. Choose network (Mainnet or Devnet)
+4. Note your endpoint URL
+
+## Step 3: Create Arbitrum Endpoint
+
+1. Click "Create Endpoint"
+2. Select "Arbitrum"
+3. Choose network (One or Sepolia)
+4. Note your endpoint URL
+
+## Step 4: Get API Key
+
+1. Go to "API Keys" in dashboard
+2. Create new API key
+3. Copy the key
+
+## Step 5: Configure Environment
+
+Update your `.env` file:
+
+```bash
+# QuickNode
+QUICKNODE_API_KEY=QN_xxxxxxxxxxxx
+QUICKNODE_SOLANA_ENDPOINT=https://your-solana-endpoint.quiknode.pro/KEY/
+QUICKNODE_ARBITRUM_ENDPOINT=https://your-arbitrum-endpoint.quiknode.pro/KEY/
+```
+
+## Step 6: Enable Add-ons
+
+### Priority Fees (FREE)
+
+1. Go to your Solana endpoint
+2. Click "Add-ons"
+3. Enable "Priority Fees"
+
+### Fastlane (FREE)
+
+1. Go to your Solana endpoint
+2. Click "Add-ons"
+3. Enable "Transaction Fastlane"
+
+### MEV Protection (FREE)
+
+1. Go to your Solana endpoint
+2. Click "Add-ons"
+3. Enable "MEV Resilience & Recovery"
+
+## Step 7: Test Connection
+
+```bash
+# Test Solana
+curl -X POST https://your-solana-endpoint.quiknode.pro/ \
+  -H "Content-Type: application/json" \
+  -d '{"jsonrpc":"2.0","id":1,"method":"getHealth"}'
+
+# Test Arbitrum
+curl -X POST https://your-arbitrum-endpoint.quiknode.pro/ \
+  -H "Content-Type: application/json" \
+  -d '{"jsonrpc":"2.0","id":1,"method":"eth_chainId"}'
+```
+
+## Advanced: Streams
+
+For real-time event indexing:
+
+1. Go to "Streams" in dashboard
+2. Create new stream
+3. Select "Solana" or "Arbitrum"
+4. Add JavaScript filter
+5. Configure webhook endpoint
+
+## Advanced: Key-Value Store
+
+For tier management:
+
+1. Go to "Key-Value Store" in dashboard
+2. Create collections:
+   - `creddao-platinum-members`
+   - `creddao-gold-members`
+   - `creddao-silver-members`
+   - `creddao-bronze-members`
+
+## Troubleshooting
+
+### Connection Timeout
+
+- Check endpoint URL is correct
+- Verify API key is valid
+- Check network connectivity
+
+### Rate Limiting
+
+- Upgrade plan for more requests
+- Implement caching
+- Use batch requests
+
+### Invalid Response
+
+- Check request format
+- Verify method name
+- Confirm parameters

@@ -1,0 +1,167 @@
+---
+title: Solana Tools Overview
+description: MCP tools for interacting with Solana governance systems.
+---
+
+# Solana Tools
+
+SolarPlex MCP provides comprehensive tools for interacting with Solana-based governance systems.
+
+## Available Tools
+
+| Tool | Description | Returns |
+|------|-------------|---------|
+| `solana_get_balance` | Get wallet balance | SOL amount |
+| `solana_get_governance_state` | Get governance state | Member profile |
+| `solana_create_proposal` | Create governance proposal | Transaction hash |
+| `solana_cast_vote` | Cast vote on proposal | Transaction hash |
+| `solana_get_fairscore` | Get FairScore for wallet | Score (0-100) |
+| `solana_delegate` | Delegate voting power | Transaction hash |
+
+## Quick Start
+
+```typescript
+// Get wallet balance
+const balance = await solana_get_balance({
+  address: "Your1111111111111111111111111111111111111"
+});
+
+// Get governance state
+const state = await solana_get_governance_state({
+  wallet: "Your1111111111111111111111111111111111111"
+});
+
+// Get FairScore
+const score = await solana_get_fairscore({
+  wallet: "Your1111111111111111111111111111111111111"
+});
+```
+
+## Tool Details
+
+### solana_get_balance
+
+Get the SOL balance for a wallet address.
+
+**Parameters:**
+- `address` (string) - Solana wallet address
+
+**Returns:**
+```json
+{
+  "balance": "1.5 SOL",
+  "lamports": 1500000000
+}
+```
+
+### solana_get_governance_state
+
+Get the governance state for a wallet, including tier, voting power, and proposal counts.
+
+**Parameters:**
+- `wallet` (string) - Solana wallet address
+
+**Returns:**
+```json
+{
+  "fairscore": 78,
+  "tier": "gold",
+  "activeDays": 120,
+  "proposalsSubmitted": 5,
+  "proposalsVoted": 23,
+  "votingPower": 256,
+  "delegateTo": null
+}
+```
+
+### solana_create_proposal
+
+Create a new governance proposal.
+
+**Parameters:**
+- `title` (string) - Proposal title
+- `description` (string) - Proposal description
+- `proposalType` (enum) - "standard" | "expedited" | "emergency"
+- `ipfsCid` (string, optional) - IPFS CID for description
+
+**Returns:**
+```json
+{
+  "signature": "5UfgJ7z...",
+  "proposalAddress": "ABC123..."
+}
+```
+
+### solana_cast_vote
+
+Cast a vote on an active proposal.
+
+**Parameters:**
+- `proposalAddress` (string) - Proposal account address
+- `vote` (enum) - "for" | "against" | "abstain"
+
+**Returns:**
+```json
+{
+  "signature": "5UfgJ7z...",
+  "votingPower": 256
+}
+```
+
+### solana_get_fairscore
+
+Get the FairScore reputation for a wallet.
+
+**Parameters:**
+- `wallet` (string) - Solana wallet address
+
+**Returns:**
+```json
+{
+  "fairscore": 78,
+  "tier": "gold",
+  "components": {
+    "activeDays": 0.85,
+    "transactionCount": 0.72,
+    "lstHoldings": 0.65,
+    "nativeSOL": 0.55,
+    "stablecoins": 0.45,
+    "walletAge": 0.80,
+    "consistency": 0.90
+  }
+}
+```
+
+### solana_delegate
+
+Delegate voting power to another member.
+
+**Parameters:**
+- `delegate` (string) - Delegate wallet address
+
+**Returns:**
+```json
+{
+  "signature": "5UfgJ7z...",
+  "delegatedTo": "Delegate111111111111111111111111111111"
+}
+```
+
+## Error Handling
+
+All tools return errors in a consistent format:
+
+```json
+{
+  "error": "Insufficient reputation tier",
+  "code": 6000,
+  "details": "Gold tier required for standard proposals"
+}
+```
+
+Common error codes:
+- `6000` - Insufficient reputation tier
+- `6001` - Insufficient active days
+- `6002` - Proposal voting active
+- `6003` - Time-lock not expired
+- `6004` - Score manipulation detected

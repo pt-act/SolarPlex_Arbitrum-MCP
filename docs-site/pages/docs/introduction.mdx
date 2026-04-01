@@ -1,0 +1,78 @@
+---
+title: Introduction
+description: SolarPlex MCP - Multi-chain AI agent framework for Solana and Arbitrum governance infrastructure.
+---
+
+# SolarPlex Arbitrum MCP
+
+SolarPlex is a **multi-chain MCP (Model Context Protocol)** for AI agents, enabling governance operations across Solana and Arbitrum. Built on CredDAO's battle-tested infrastructure, it provides a unified interface for reputation-weighted DAO systems.
+
+## The Problem
+
+AI agents need a standardized way to interact with blockchain governance systems across multiple chains. Current solutions are either:
+- **Chain-specific** - Only work on one network
+- **Complex** - Require deep blockchain knowledge
+- **Unprotected** - Expose internal framework logic
+
+## Our Solution
+
+SolarPlex MCP provides:
+
+- **Multi-chain support** - Solana + Arbitrum in one interface
+- **Governance-first** - Built specifically for DAO operations
+- **Framework protection** - Internal logic stays private
+- **Production-ready** - Based on CredDAO's proven architecture
+
+## Key Features
+
+<Columns>
+  <Column>
+    ### Solana Governance
+    
+    - Anchor smart contract integration
+    - FairScore reputation system
+    - Quadratic voting mechanisms
+    - Time-locked proposals
+  </Column>
+  
+  <Column>
+    ### Arbitrum Support
+    
+    - ERC-8004 identity registry
+    - Stylus (Rust) contracts
+    - Solidity (Foundry) contracts
+    - Asset bridging
+  </Column>
+</Columns>
+
+## Architecture
+
+```
+SolarPlex MCP Server
+├── Tools:
+│   ├── solana_governance      → Solana/Anchor governance
+│   ├── arbitrum_governance    → Arbitrum/Stylus governance
+│   ├── fairscore_oracle       → FairScore integration
+│   └── multi_chain_bridge     → Cross-chain coordination
+├── Registration:
+│   ├── Solana: moltlaunch wallet
+│   └── Arbitrum: ERC-8004 registry
+└── QuickNode:
+    ├── Solana: Existing endpoint
+    └── Arbitrum: New endpoint
+```
+
+## Services Offered
+
+| Service | Price | Chain |
+|---------|-------|-------|
+| Anchor/Solana Development | 0.015 ETH | Solana |
+| Stylus/Rust Development | 0.018 ETH | Arbitrum |
+| Solidity Development | 0.015 ETH | Arbitrum |
+| Governance Architecture | 0.020 ETH | Both |
+| FairScore Integration | 0.012 ETH | Solana |
+| Security & Audits | 0.018 ETH | Both |
+
+## Getting Started
+
+Head to the [Quickstart](/quickstart) guide to begin using SolarPlex MCP, or explore the [concepts](/concepts) to understand the system in depth.

@@ -1,0 +1,206 @@
+---
+title: Arbitrum Tools Overview
+description: MCP tools for interacting with Arbitrum governance and smart contracts.
+---
+
+# Arbitrum Tools
+
+SolarPlex MCP provides tools for interacting with Arbitrum-based systems, including ERC-8004 identity registration, Stylus contracts, and Solidity contracts.
+
+## Available Tools
+
+| Tool | Description | Returns |
+|------|-------------|---------|
+| `arbitrum_register_agent` | Register on ERC-8004 registry | Transaction hash |
+| `arbitrum_get_balance` | Get ETH balance | ETH amount |
+| `arbitrum_deploy_stylus` | Deploy Stylus (Rust) contract | Contract address |
+| `arbitrum_deploy_solidity` | Deploy Solidity contract | Contract address |
+| `arbitrum_read_contract` | Read from contract | Contract response |
+| `arbitrum_write_contract` | Write to contract | Transaction hash |
+| `arbitrum_bridge_assets` | Bridge assets to/from Arbitrum | Transaction hash |
+
+## Quick Start
+
+```typescript
+// Register agent on Arbitrum
+const tx = await arbitrum_register_agent({
+  name: "MyAgent",
+  description: "AI agent for governance",
+  skills: ["code", "solana", "governance"],
+  endpoint: "https://my-agent.com"
+});
+
+// Get balance
+const balance = await arbitrum_get_balance({
+  address: "0x..."
+});
+
+// Deploy Stylus contract
+const address = await arbitrum_deploy_stylus({
+  contractPath: "./contracts/my-contract",
+  network: "sepolia"
+});
+```
+
+## Tool Details
+
+### arbitrum_register_agent
+
+Register an agent on the Arbitrum ERC-8004 identity registry.
+
+**Parameters:**
+- `name` (string) - Agent name
+- `description` (string) - Agent description
+- `skills` (string[]) - Array of skills
+- `endpoint` (string, optional) - Public endpoint URL
+
+**Returns:**
+```json
+{
+  "transactionHash": "0x...",
+  "agentId": 158
+}
+```
+
+**Registry Addresses:**
+- Arbitrum One: `0x8004A169FB4a3325136EB29fA0ceB6D2e539a432`
+- Arbitrum Sepolia: `0x8004A818BFB912233c491871b3d84c89A494BD9e`
+
+### arbitrum_get_balance
+
+Get the ETH balance for an Arbitrum address.
+
+**Parameters:**
+- `address` (string) - Arbitrum wallet address
+
+**Returns:**
+```json
+{
+  "balance": "0.2 ETH",
+  "wei": "200000000000000000"
+}
+```
+
+### arbitrum_deploy_stylus
+
+Deploy a Stylus (Rust) contract to Arbitrum.
+
+**Parameters:**
+- `contractPath` (string) - Path to contract directory
+- `network` (enum) - "mainnet" | "sepolia"
+
+**Returns:**
+```json
+{
+  "contractAddress": "0x...",
+  "transactionHash": "0x..."
+}
+```
+
+**Prerequisites:**
+- Rust 1.81+
+- cargo-stylus CLI
+- Docker (for validation)
+
+### arbitrum_deploy_solidity
+
+Deploy a Solidity contract to Arbitrum using Foundry.
+
+**Parameters:**
+- `contractName` (string) - Contract name
+- `constructorArgs` (string[], optional) - Constructor arguments
+- `network` (enum) - "mainnet" | "sepolia"
+
+**Returns:**
+```json
+{
+  "contractAddress": "0x...",
+  "transactionHash": "0x..."
+}
+```
+
+**Prerequisites:**
+- Foundry (forge, cast)
+- Solidity 0.8.x
+
+### arbitrum_read_contract
+
+Read from an Arbitrum contract.
+
+**Parameters:**
+- `address` (string) - Contract address
+- `abi` (any[]) - Contract ABI
+- `functionName` (string) - Function to call
+- `args` (any[], optional) - Function arguments
+
+**Returns:**
+```json
+{
+  "result": "..."
+}
+```
+
+### arbitrum_write_contract
+
+Write to an Arbitrum contract.
+
+**Parameters:**
+- `address` (string) - Contract address
+- `abi` (any[]) - Contract ABI
+- `functionName` (string) - Function to call
+- `args` (any[], optional) - Function arguments
+
+**Returns:**
+```json
+{
+  "transactionHash": "0x..."
+}
+```
+
+### arbitrum_bridge_assets
+
+Bridge assets between Ethereum and Arbitrum.
+
+**Parameters:**
+- `fromChain` (enum) - "ethereum" | "arbitrum"
+- `toChain` (enum) - "ethereum" | "arbitrum"
+- `tokenAddress` (string) - Token contract address
+- `amount` (string) - Amount to bridge
+
+**Returns:**
+```json
+{
+  "transactionHash": "0x...",
+  "estimatedTime": "~10 minutes"
+}
+```
+
+## Network Configuration
+
+### Arbitrum One (Mainnet)
+- Chain ID: 42161
+- RPC: `https://arb1.arbitrum.io/rpc`
+- Explorer: `https://arbiscan.io`
+
+### Arbitrum Sepolia (Testnet)
+- Chain ID: 421614
+- RPC: `https://sepolia-rollup.arbitrum.io/rpc`
+- Explorer: `https://sepolia.arbiscan.io`
+
+## Error Handling
+
+Arbitrum tools return errors with Arbitrum-specific codes:
+
+```json
+{
+  "error": "Execution reverted",
+  "code": "CALL_EXCEPTION",
+  "reason": "Insufficient balance"
+}
+```
+
+Common errors:
+- `INSUFFICIENT_FUNDS` - Not enough ETH for gas
+- `CALL_EXCEPTION` - Contract function reverted
+- `UNPREDICTABLE_GAS_LIMIT` - Cannot estimate gas
+- `REPLACEMENT_UNDERPRICED` - Gas price too low

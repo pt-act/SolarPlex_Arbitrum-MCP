@@ -1,0 +1,216 @@
+---
+title: Deployment
+description: Deploy SolarPlex MCP to production.
+---
+
+# Deployment
+
+This guide covers deploying SolarPlex MCP to production environments.
+
+## Deployment Options
+
+### Option 1: Direct Deployment
+
+Deploy directly on a server:
+
+```bash
+# Build
+npm run build
+
+# Run
+node dist/index.js
+```
+
+### Option 2: Docker
+
+Deploy using Docker:
+
+```dockerfile
+FROM node:20-alpine
+
+WORKDIR /app
+
+COPY package*.json ./
+RUN npm ci --only=production
+
+COPY dist/ ./dist/
+
+CMD ["node", "dist/index.js"]
+```
+
+Build and run:
+
+```bash
+docker build -t solarplex-mcp .
+docker run -d solarplex-mcp
+```
+
+### Option 3: Cloud Functions
+
+Deploy as serverless function:
+
+```bash
+# AWS Lambda
+serverless deploy
+
+# Google Cloud Functions
+gcloud functions deploy solarplex-mcp
+
+# Azure Functions
+func azure functionapp publish
+```
+
+## Environment Configuration
+
+### Production Environment
+
+Set these environment variables:
+
+```bash
+# Production RPC endpoints
+SOLANA_RPC_URL=https://api.mainnet-beta.solana.com
+ARBITRUM_RPC_URL=https://arb1.arbitrum.io/rpc
+
+# QuickNode endpoints
+QUICKNODE_API_KEY=your_production_key
+QUICKNODE_SOLANA_ENDPOINT=https://production-endpoint.quiknode.pro/
+QUICKNODE_ARBITRUM_ENDPOINT=https://production-arbitrum.quiknode.pro/
+
+# Agent configuration
+AGENT_WALLET=0x...
+AGENT_NAME=SolarPlex
+```
+
+### Security Considerations
+
+1. **Never commit secrets** - Use environment variables
+2. **Rotate API keys** - Regularly update QuickNode keys
+3. **Monitor usage** - Track API consumption
+4. **Rate limiting** - Implement request throttling
+
+## Monitoring
+
+### Health Checks
+
+Implement health checks:
+
+```bash
+curl -X POST http://localhost:3000/health \
+  -H "Content-Type: application/json" \
+  -d '{"method":"getHealth"}'
+```
+
+### Logging
+
+Configure structured logging:
+
+```bash
+LOG_LEVEL=info
+LOG_FORMAT=json
+```
+
+### Metrics
+
+Track these metrics:
+
+- Request count
+- Error rate
+- Latency
+- RPC usage
+
+## Scaling
+
+### Horizontal Scaling
+
+Deploy multiple instances:
+
+```bash
+# Load balancer
+nginx -> instance1
+       -> instance2
+       -> instance3
+```
+
+### Vertical Scaling
+
+Increase resources:
+
+- More CPU
+- More memory
+- Faster network
+
+### Auto-scaling
+
+Configure auto-scaling rules:
+
+- CPU > 70% → scale up
+- CPU < 30% → scale down
+
+## Backup & Recovery
+
+### Configuration Backup
+
+```bash
+# Backup environment
+cp .env .env.backup
+
+# Backup config
+cp -r config/ config.backup/
+```
+
+### Recovery
+
+```bash
+# Restore environment
+cp .env.backup .env
+
+# Restore config
+cp -r config.backup/ config/
+```
+
+## CI/CD Pipeline
+
+### GitHub Actions
+
+```yaml
+name: Deploy
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 20
+      - run: npm ci
+      - run: npm run build
+      - run: npm test
+      - run: npm run deploy
+```
+
+## Troubleshooting
+
+### Deployment Issues
+
+- Check Node.js version
+- Verify environment variables
+- Confirm dependencies installed
+- Check network connectivity
+
+### Runtime Issues
+
+- Monitor error logs
+- Check resource usage
+- Verify RPC endpoints
+- Confirm API keys
+
+### Performance Issues
+
+- Optimize queries
+- Implement caching
+- Reduce RPC calls
+- Use connection pooling

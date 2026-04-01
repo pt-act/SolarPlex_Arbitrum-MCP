@@ -1,0 +1,123 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "name": "SolarPlex Arbitrum MCP",
+  "logo": {
+    "dark": "/logo/dark.svg",
+    "light": "/logo/light.svg"
+  },
+  "favicon": "/favicon.png",
+  "colors": {
+    "primary": "#7c3aed",
+    "light": "#8b5cf6",
+    "dark": "#6d28d9",
+    "anchors": {
+      "from": "#7c3aed",
+      "to": "#00d4ff"
+    }
+  },
+  "topbarLinks": [
+    {
+      "name": "GitHub",
+      "url": "https://github.com/solarplex/mcp"
+    }
+  ],
+  "topbarCtaButton": {
+    "name": "Hire on MoltLaunch",
+    "url": "https://moltlaunch.com/agents"
+  },
+  "tabs": [
+    {
+      "name": "Guides",
+      "url": "/guides"
+    },
+    {
+      "name": "Tools",
+      "url": "/tools"
+    },
+    {
+      "name": "Architecture",
+      "url": "/architecture"
+    }
+  ],
+  "anchors": [
+    {
+      "name": "Documentation",
+      "icon": "book-open",
+      "url": "/"
+    },
+    {
+      "name": "CredDAO",
+      "icon": "shield",
+      "url": "https://creddao.io"
+    },
+    {
+      "name": "MoltLaunch",
+      "icon": "rocket",
+      "url": "https://moltlaunch.com"
+    }
+  ],
+  "navigation": [
+    {
+      "group": "Getting Started",
+      "pages": [
+        "introduction",
+        "quickstart",
+        "concepts"
+      ]
+    },
+    {
+      "group": "Guides",
+      "pages": [
+        "guides/installation",
+        "guides/quicknode-setup",
+        "guides/agent-registration",
+        "guides/deployment"
+      ]
+    },
+    {
+      "group": "Solana Tools",
+      "pages": [
+        "tools/solana-overview",
+        "tools/solana-balance",
+        "tools/solana-governance",
+        "tools/solana-proposals",
+        "tools/solana-voting",
+        "tools/solana-delegation"
+      ]
+    },
+    {
+      "group": "Arbitrum Tools",
+      "pages": [
+        "tools/arbitrum-overview",
+        "tools/arbitrum-register",
+        "tools/arbitrum-balance",
+        "tools/arbitrum-stylus",
+        "tools/arbitrum-solidity",
+        "tools/arbitrum-bridge"
+      ]
+    },
+    {
+      "group": "Governance Tools",
+      "pages": [
+        "tools/governance-overview",
+        "tools/governance-reputation",
+        "tools/governance-voting-power",
+        "tools/governance-proposals",
+        "tools/governance-delegation"
+      ]
+    },
+    {
+      "group": "Architecture",
+      "pages": [
+        "architecture/overview",
+        "architecture/mcp-structure",
+        "architecture/quicknode-integration"
+      ]
+    }
+  ],
+  "footerSocials": {
+    "twitter": "https://twitter.com/solarplex",
+    "github": "https://github.com/solarplex",
+    "discord": "https://discord.gg/solarplex"
+  }
+}

@@ -1,0 +1,216 @@
+---
+title: Governance Tools Overview
+description: Cross-chain governance tools for reputation-weighted DAO systems.
+---
+
+# Governance Tools
+
+SolarPlex MCP provides cross-chain governance tools that work across Solana and Arbitrum.
+
+## Available Tools
+
+| Tool | Description | Returns |
+|------|-------------|---------|
+| `governance_get_reputation` | Cross-chain reputation score | Reputation data |
+| `governance_get_tier` | Governance tier | Tier info |
+| `governance_calculate_voting_power` | Calculate voting power | Voting power |
+| `governance_get_proposal_status` | Proposal status | Status info |
+| `governance_create_multichain_proposal` | Multi-chain proposal | Transaction hashes |
+| `governance_get_delegation_efficiency` | Delegation efficiency | Efficiency score |
+
+## Quick Start
+
+```typescript
+// Get cross-chain reputation
+const reputation = await governance_get_reputation({
+  wallet: "0x...",
+  chains: ["solana", "arbitrum"]
+});
+
+// Calculate voting power
+const power = await governance_calculate_voting_power({
+  tokenBalance: "10000",
+  fairscore: 78
+});
+
+// Get governance tier
+const tier = await governance_get_tier({
+  wallet: "0x...",
+  chain: "arbitrum"
+});
+```
+
+## Tool Details
+
+### governance_get_reputation
+
+Get cross-chain reputation score for a wallet.
+
+**Parameters:**
+- `wallet` (string) - Wallet address
+- `chains` (string[]) - Array of chains to check
+
+**Returns:**
+```json
+{
+  "wallet": "0x...",
+  "reputation": {
+    "solana": {
+      "fairscore": 78,
+      "tier": "gold"
+    },
+    "arbitrum": {
+      "fairscore": 65,
+      "tier": "silver"
+    },
+    "combined": {
+      "average": 71.5,
+      "tier": "silver"
+    }
+  }
+}
+```
+
+### governance_get_tier
+
+Get governance tier for a wallet on a specific chain.
+
+**Parameters:**
+- `wallet` (string) - Wallet address
+- `chain` (enum) - "solana" | "arbitrum"
+
+**Returns:**
+```json
+{
+  "tier": "gold",
+  "fairscore": 78,
+  "range": "70-84",
+  "timeLock": "48h",
+  "privileges": ["standard", "expedited"]
+}
+```
+
+### governance_calculate_voting_power
+
+Calculate quadratic voting power using the FairScore formula.
+
+**Parameters:**
+- `tokenBalance` (string) - Token balance
+- `fairscore` (number) - FairScore (0-100)
+
+**Returns:**
+```json
+{
+  "quadraticBase": 100,
+  "reputationMultiplier": 2.56,
+  "totalPower": 256,
+  "formula": "√10000 × (1 + 78/50) = 256"
+}
+```
+
+### governance_get_proposal_status
+
+Get the status of a proposal on a specific chain.
+
+**Parameters:**
+- `proposalId` (string) - Proposal ID or address
+- `chain` (enum) - "solana" | "arbitrum"
+
+**Returns:**
+```json
+{
+  "proposalId": "...",
+  "chain": "solana",
+  "state": "voting",
+  "forVotes": 1500,
+  "againstVotes": 200,
+  "abstainVotes": 50,
+  "votingEnd": "2026-04-15T00:00:00Z",
+  "timeLockExpiry": null,
+  "quorumReached": true
+}
+```
+
+### governance_create_multichain_proposal
+
+Create proposals on multiple chains simultaneously.
+
+**Parameters:**
+- `title` (string) - Proposal title
+- `description` (string) - Proposal description
+- `proposalType` (enum) - "standard" | "expedited" | "emergency"
+- `chains` (string[]) - Array of chains
+
+**Returns:**
+```json
+{
+  "proposals": [
+    {
+      "chain": "solana",
+      "signature": "5UfgJ7z...",
+      "proposalAddress": "ABC123..."
+    },
+    {
+      "chain": "arbitrum",
+      "transactionHash": "0x...",
+      "proposalId": 42
+    }
+  ]
+}
+```
+
+### governance_get_delegation_efficiency
+
+Calculate delegation efficiency score.
+
+**Parameters:**
+- `delegator` (string) - Delegator wallet address
+- `delegate` (string) - Delegate wallet address
+
+**Returns:**
+```json
+{
+  "efficiency": 0.85,
+  "formula": "delegateScore × participationRate × tierMultiplier / 10000",
+  "components": {
+    "delegateScore": 78,
+    "participationRate": 0.92,
+    "tierMultiplier": 2.56
+  }
+}
+```
+
+## Cross-Chain Features
+
+### Unified Reputation
+
+Combine reputation from multiple chains:
+
+```typescript
+const reputation = await governance_get_reputation({
+  wallet: "0x...",
+  chains: ["solana", "arbitrum"]
+});
+// Returns weighted average across chains
+```
+
+### Multi-Chain Proposals
+
+Create proposals that span multiple chains:
+
+```typescript
+const result = await governance_create_multichain_proposal({
+  title: "Cross-Chain Treasury Allocation",
+  description: "Allocate funds across Solana and Arbitrum",
+  proposalType: "standard",
+  chains: ["solana", "arbitrum"]
+});
+// Returns proposals on both chains
+```
+
+## Security Features
+
+- **Flash Loan Protection** - 30-day minimum active period
+- **Score Snapshots** - Recorded at vote time
+- **Decay Detection** - Flags sudden score drops
+- **Time-Locks** - Tier-based execution delays

@@ -1,0 +1,176 @@
+---
+title: MCP Structure
+description: Understand the Model Context Protocol server structure.
+---
+
+# MCP Structure
+
+SolarPlex MCP implements the Model Context Protocol (MCP) for AI agent integration.
+
+## What is MCP?
+
+MCP is a protocol for connecting AI models to external tools and data sources. It provides:
+
+- **Standardized Interface** - Works with any AI assistant
+- **Tool-based** - Each operation is a callable tool
+- **Extensible** - Easy to add new capabilities
+- **Secure** - Framework logic stays protected
+
+## Server Architecture
+
+```
+┌─────────────────────────────────────────────────┐
+│                 MCP Server                       │
+│  ┌─────────────────────────────────────────┐   │
+│  │         Request Handler                  │   │
+│  │  - ListToolsRequestSchema               │   │
+│  │  - CallToolRequestSchema                │   │
+│  └─────────────────────────────────────────┘   │
+│  ┌───────────┐  ┌───────────┐  ┌───────────┐  │
+│  │  Solana   │  │ Arbitrum  │  │Governance │  │
+│  │  Tools    │  │  Tools    │  │  Tools    │  │
+│  └───────────┘  └───────────┘  └───────────┘  │
+└─────────────────────────────────────────────────┘
+```
+
+## Server Implementation
+
+### Entry Point
+
+```typescript
+import { Server } from '@modelcontextprotocol/sdk/server/index.js';
+import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+
+const server = new Server(
+  {
+    name: 'solarplex-arbitrum-mcp',
+    version: '1.0.0',
+  },
+  {
+    capabilities: {
+      tools: {},
+    },
+  }
+);
+
+// Register tools
+registerSolanaTools(server, config);
+registerArbitrumTools(server, config);
+registerGovernanceTools(server, config);
+
+// Start server
+const transport = new StdioServerTransport();
+await server.connect(transport);
+```
+
+## Tool Registration
+
+### List Tools
+
+```typescript
+server.setRequestHandler(ListToolsRequestSchema, async () => ({
+  tools: [
+    {
+      name: 'solana_get_balance',
+      description: 'Get Solana wallet balance',
+      inputSchema: z.object({
+        address: z.string(),
+      }),
+    },
+    // ... more tools
+  ],
+}));
+```
+
+### Call Tool
+
+```typescript
+server.setRequestHandler(CallToolRequestSchema, async (request) => {
+  const { name, arguments: args } = request.params;
+
+  switch (name) {
+    case 'solana_get_balance':
+      return await getSolanaBalance(args);
+    // ... handle other tools
+  }
+});
+```
+
+## Tool Structure
+
+Each tool follows this pattern:
+
+```typescript
+interface Tool {
+  name: string;
+  description: string;
+  inputSchema: ZodSchema;
+}
+
+interface ToolResponse {
+  content: Array<{
+    type: 'text';
+    text: string;
+  }>;
+}
+```
+
+## Error Handling
+
+Errors are returned in a consistent format:
+
+```typescript
+return {
+  content: [
+    {
+      type: 'text',
+      text: JSON.stringify({
+        error: 'Invalid address',
+        code: 'INVALID_INPUT',
+      }),
+    },
+  ],
+};
+```
+
+## Configuration
+
+Configuration is loaded from environment:
+
+```typescript
+const config = loadConfig();
+
+// Solana
+config.solana.rpcUrl
+config.solana.programId
+
+// Arbitrum
+config.arbitrum.rpcUrl
+config.arbitrum.identityRegistry
+
+// Agent
+config.agent.wallet
+config.agent.name
+```
+
+## Extension Points
+
+### Adding New Tools
+
+1. Create tool in `src/tools/`
+2. Register in `src/index.ts`
+3. Update documentation
+
+### Adding New Chains
+
+1. Create chain-specific tools
+2. Add RPC configuration
+3. Update routing logic
+
+## Best Practices
+
+1. **Type Safety** - Use TypeScript for all code
+2. **Validation** - Validate all inputs with Zod
+3. **Error Handling** - Return consistent error format
+4. **Documentation** - Document all tools
+5. **Testing** - Write tests for all tools

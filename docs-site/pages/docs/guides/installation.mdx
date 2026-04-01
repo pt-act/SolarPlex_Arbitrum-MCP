@@ -1,0 +1,161 @@
+---
+title: Installation
+description: Install and configure SolarPlex MCP for local development.
+---
+
+# Installation
+
+This guide walks you through installing SolarPlex MCP for local development.
+
+## Prerequisites
+
+- Node.js 20+
+- npm or pnpm
+- Git
+- QuickNode API key (optional)
+
+## Step 1: Clone Repository
+
+```bash
+git clone https://github.com/solarplex/arbitrum-mcp.git
+cd arbitrum-mcp
+```
+
+## Step 2: Install Dependencies
+
+```bash
+npm install
+```
+
+## Step 3: Configure Environment
+
+Copy the example environment file:
+
+```bash
+cp .env.example .env
+```
+
+Edit `.env` with your configuration:
+
+```bash
+# Solana
+SOLANA_RPC_URL=https://api.mainnet-beta.solana.com
+SOLANA_PROGRAM_ID=CreDDAo111111111111111111111111111111111111
+FAIRSCORE_PROGRAM_ID=Faire11111111111111111111111111111111111111
+SOLANA_NETWORK=devnet
+
+# Arbitrum
+ARBITRUM_RPC_URL=https://arb1.arbitrum.io/rpc
+ARBITRUM_SEPOLIA_RPC_URL=https://sepolia-rollup.arbitrum.io/rpc
+ARBITRUM_CHAIN_ID=42161
+
+# QuickNode
+QUICKNODE_API_KEY=your_key
+QUICKNODE_SOLANA_ENDPOINT=https://your-solana-endpoint.quiknode.pro/
+QUICKNODE_ARBITRUM_ENDPOINT=https://your-arbitrum-endpoint.quiknode.pro/
+
+# Agent
+AGENT_WALLET=0x...
+AGENT_NAME=SolarPlex
+```
+
+## Step 4: Build
+
+```bash
+npm run build
+```
+
+## Step 5: Run
+
+```bash
+npm start
+```
+
+## Development Mode
+
+For development with hot-reload:
+
+```bash
+npm run dev
+```
+
+## Testing
+
+Run tests:
+
+```bash
+npm test
+```
+
+## Linting
+
+Check code style:
+
+```bash
+npm run lint
+```
+
+## Type Checking
+
+Verify TypeScript types:
+
+```bash
+npm run typecheck
+```
+
+## Directory Structure
+
+```
+solarplex-arbitrum-mcp/
+├── src/
+│   ├── index.ts              # MCP server entry
+│   ├── config/index.ts       # Configuration
+│   └── tools/
+│       ├── solana.ts         # Solana tools
+│       ├── arbitrum.ts       # Arbitrum tools
+│       └── governance.ts     # Governance tools
+├── docs/
+│   └── deployment.md         # Deployment guide
+├── scripts/
+│   └── register-agent.ts     # Agent registration
+├── .env.example              # Environment template
+├── package.json              # Dependencies
+├── tsconfig.json             # TypeScript config
+└── README.md                 # Documentation
+```
+
+## Troubleshooting
+
+### Node Version Issues
+
+If you get Node.js version errors:
+
+```bash
+nvm use 20
+```
+
+### Permission Errors
+
+If you get permission errors during install:
+
+```bash
+sudo npm install
+```
+
+### Module Not Found
+
+If modules are missing:
+
+```bash
+rm -rf node_modules package-lock.json
+npm install
+```
+
+### Environment Issues
+
+If configuration isn't loading:
+
+1. Check `.env` file exists
+2. Verify variable names match
+3. Ensure no extra spaces
+4. Restart terminal

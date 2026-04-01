@@ -1,0 +1,119 @@
+---
+title: Quickstart
+description: Get started with SolarPlex MCP in minutes.
+---
+
+# Quickstart
+
+Get up and running with SolarPlex MCP in just a few minutes.
+
+## Prerequisites
+
+Before you begin, ensure you have:
+
+- Node.js 20+
+- npm or pnpm
+- A Solana wallet (Phantom or Solflare)
+- An EVM wallet (MetaMask)
+- QuickNode API key (optional for Solana)
+
+## Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/solarplex/arbitrum-mcp.git
+cd arbitrum-mcp
+
+# Install dependencies
+npm install
+
+# Copy environment file
+cp .env.example .env
+```
+
+## Configuration
+
+Edit `.env` with your endpoints:
+
+```bash
+# Solana
+SOLANA_RPC_URL=https://api.mainnet-beta.solana.com
+
+# Arbitrum
+ARBITRUM_RPC_URL=https://arb1.arbitrum.io/rpc
+ARBITRUM_SEPOLIA_RPC_URL=https://sepolia-rollup.arbitrum.io/rpc
+
+# QuickNode (optional)
+QUICKNODE_API_KEY=your_key
+QUICKNODE_SOLANA_ENDPOINT=https://your-endpoint.quiknode.pro/
+QUICKNODE_ARBITRUM_ENDPOINT=https://your-arbitrum-endpoint.quiknode.pro/
+```
+
+## Build and Run
+
+```bash
+# Build
+npm run build
+
+# Run
+npm start
+
+# Development mode
+npm run dev
+```
+
+## Using with Claude
+
+Add to your Claude MCP configuration:
+
+```json
+{
+  "mcpServers": {
+    "solarplex-arbitrum": {
+      "command": "node",
+      "args": ["/path/to/solarplex-arbitrum-mcp/dist/index.js"],
+      "env": {
+        "SOLANA_RPC_URL": "https://your-quicknode-solana-endpoint.quiknode.pro/",
+        "ARBITRUM_RPC_URL": "https://your-quicknode-arbitrum-endpoint.quiknode.pro/"
+      }
+    }
+  }
+}
+```
+
+## Test Connection
+
+```bash
+# Check Solana connection
+curl -X POST https://api.mainnet-beta.solana.com \
+  -H "Content-Type: application/json" \
+  -d '{"jsonrpc":"2.0","id":1,"method":"getHealth"}'
+
+# Check Arbitrum connection
+curl -X POST https://arb1.arbitrum.io/rpc \
+  -H "Content-Type: application/json" \
+  -d '{"jsonrpc":"2.0","id":1,"method":"eth_chainId"}'
+```
+
+## Next Steps
+
+- Explore [Solana Tools](/tools/solana-overview)
+- Learn about [Arbitrum Tools](/tools/arbitrum-overview)
+- Understand [Governance Tools](/tools/governance-overview)
+- Read the [Architecture](/architecture/overview) documentation
+
+## Common Issues
+
+### Connection Errors
+
+If you get connection errors:
+1. Check your RPC endpoints are correct
+2. Ensure your API keys are valid
+3. Verify network connectivity
+
+### Wallet Issues
+
+If wallet operations fail:
+1. Ensure wallet has sufficient balance
+2. Check wallet is on correct network
+3. Verify private key format (without 0x prefix)

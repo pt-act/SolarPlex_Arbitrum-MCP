@@ -1,0 +1,193 @@
+---
+title: Architecture Overview
+description: Understand the SolarPlex MCP architecture and design decisions.
+---
+
+# Architecture Overview
+
+SolarPlex MCP is designed as a multi-chain framework for AI-powered governance operations.
+
+## System Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    AI Assistant (Claude)                      │
+└─────────────────────────┬───────────────────────────────────┘
+                          │ MCP Protocol
+┌─────────────────────────▼───────────────────────────────────┐
+│                  SolarPlex MCP Server                        │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐         │
+│  │ Solana Tools│  │Arbitrum Tools│  │Governance   │         │
+│  └──────┬──────┘  └──────┬──────┘  └──────┬──────┘         │
+└─────────┼────────────────┼────────────────┼─────────────────┘
+          │                │                │
+┌─────────▼──────┐ ┌──────▼──────┐ ┌───────▼─────────────────┐
+│  Solana RPC    │ │ Arbitrum RPC│ │   QuickNode Platform    │
+│  (QuickNode)   │ │ (QuickNode) │ │   Streams + KV Store    │
+└─────────┬──────┘ └──────┬──────┘ └─────────────────────────┘
+          │                │
+┌─────────▼──────┐ ┌──────▼──────┐
+│ Solana Programs│ │Arbitrum     │
+│ CredDAO        │ │ERC-8004     │
+│ FairScore      │ │Registry     │
+└────────────────┘ └─────────────┘
+```
+
+## Component Breakdown
+
+### MCP Server
+
+The core server implements the Model Context Protocol, providing:
+- Tool registration
+- Request handling
+- Error management
+- Configuration loading
+
+### Solana Tools
+
+Tools for interacting with Solana-based governance:
+- Balance queries
+- Governance state
+- Proposal management
+- Voting operations
+- Delegation
+
+### Arbitrum Tools
+
+Tools for Arbitrum-based operations:
+- ERC-8004 registration
+- Contract deployment (Stylus/Solidity)
+- Contract interaction
+- Asset bridging
+
+### Governance Tools
+
+Cross-chain governance operations:
+- Reputation aggregation
+- Voting power calculation
+- Multi-chain proposals
+- Delegation efficiency
+
+## Data Flow
+
+### Registration Flow
+
+```
+1. User → MCP Server → arbitrum_register_agent
+2. MCP Server → Arbitrum RPC → ERC-8004 Registry
+3. ERC-8004 Registry → On-chain Registration
+4. Registration → Transaction Hash → User
+```
+
+### Governance Flow
+
+```
+1. User → MCP Server → solana_get_governance_state
+2. MCP Server → Solana RPC → CredDAO Program
+3. CredDAO Program → Member Profile
+4. Member Profile → MCP Server → User
+```
+
+### Cross-Chain Flow
+
+```
+1. User → MCP Server → governance_get_reputation
+2. MCP Server → Solana RPC → FairScore
+3. MCP Server → Arbitrum RPC → ERC-8004 Score
+4. Combined Scores → Weighted Average → User
+```
+
+## Security Model
+
+### Agent Registration
+
+- On-chain identity via ERC-8004
+- Public verification of agent metadata
+- Skill-based discovery
+- Endpoint validation
+
+### Transaction Security
+
+- Private keys never exposed
+- Transaction signing via wallet
+- Gas estimation before execution
+- Error handling with rollback
+
+### Data Privacy
+
+- Framework logic stays protected
+- Only public tools exposed
+- Internal state isolated
+- Configuration secured via environment
+
+## QuickNode Integration
+
+### RPC Access
+
+- Low-latency chain interaction
+- Multi-chain support
+- Automatic failover
+- Rate limiting
+
+### Streams
+
+- Real-time event indexing
+- JavaScript filters
+- Webhook delivery
+- Historical backfill
+
+### Key-Value Store
+
+- Tier management
+- Banned wallet lists
+- Indexer state
+- Cache layer
+
+### IPFS
+
+- Proposal storage
+- Metadata hosting
+- Content addressing
+- Gateway access
+
+## Design Decisions
+
+### Why MCP?
+
+1. **Standardization** - Works with any AI assistant
+2. **Extensibility** - Easy to add new tools
+3. **Security** - Framework logic protected
+4. **Interoperability** - Multi-chain by design
+
+### Why Multi-Chain?
+
+1. **Solana** - High throughput, low fees
+2. **Arbitrum** - EVM compatibility, established ecosystem
+3. **Cross-chain** - Unified governance experience
+
+### Why QuickNode?
+
+1. **Performance** - Low-latency RPC
+2. **Reliability** - 99.9% uptime SLA
+3. **Features** - Streams, KV Store, IPFS
+4. **Multi-chain** - Solana + EVM support
+
+## Scaling Considerations
+
+### Horizontal Scaling
+
+- Stateless MCP server
+- Load balancer compatible
+- Multiple instances possible
+
+### Vertical Scaling
+
+- Connection pooling
+- Request caching
+- Batch operations
+
+### Cost Optimization
+
+- QuickNode credit management
+- Gas optimization
+- Caching strategy

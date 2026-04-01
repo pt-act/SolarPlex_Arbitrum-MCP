@@ -1,0 +1,208 @@
+---
+title: QuickNode Integration
+description: Understand how SolarPlex MCP integrates with QuickNode.
+---
+
+# QuickNode Integration
+
+SolarPlex MCP uses QuickNode for high-performance RPC access and advanced features.
+
+## Overview
+
+QuickNode provides:
+- **RPC Access** - Low-latency chain interaction
+- **Streams** - Real-time event indexing
+- **Key-Value Store** - Tier management
+- **IPFS** - Proposal storage
+
+## RPC Integration
+
+### Solana RPC
+
+```typescript
+import { createPublicClient, http } from 'viem';
+
+const client = createPublicClient({
+  transport: http(process.env.QUICKNODE_SOLANA_ENDPOINT),
+});
+```
+
+### Arbitrum RPC
+
+```typescript
+import { createPublicClient, http } from 'viem';
+import { arbitrum } from 'viem/chains';
+
+const client = createPublicClient({
+  chain: arbitrum,
+  transport: http(process.env.QUICKNODE_ARBITRUM_ENDPOINT),
+});
+```
+
+## Streams Integration
+
+### Event Filtering
+
+JavaScript filters for governance events:
+
+```javascript
+// Filter CredDAO events
+if (event.programId === 'CreDDAo111111111111111111111111111111111111') {
+  return {
+    type: 'governance',
+    data: event,
+  };
+}
+```
+
+### Webhook Delivery
+
+Streams send filtered events to webhook endpoints:
+
+```typescript
+app.post('/api/streams', (req, res) => {
+  const event = req.body;
+  
+  // Validate HMAC signature
+  if (!validateSignature(req)) {
+    return res.status(401).json({ error: 'Invalid signature' });
+  }
+  
+  // Process event
+  processEvent(event);
+  
+  res.status(200).json({ received: true });
+});
+```
+
+## Key-Value Store Integration
+
+### Tier Management
+
+```typescript
+import { kvClient } from './services/quicknode-kv';
+
+// Sync tier lists
+await kvClient.syncTierLists();
+
+// Check membership
+const isPlatinum = await kvClient.checkMembership(
+  'creddao-platinum-members',
+  walletAddress
+);
+```
+
+### Banned Wallets
+
+```typescript
+// Ban wallet
+await kvClient.banWallet(walletAddress, reason);
+
+// Check if banned
+const isBanned = await kvClient.isWalletBanned(walletAddress);
+```
+
+### Indexer State
+
+```typescript
+// Get last indexed slot
+const lastSlot = await kvClient.getLastIndexedSlot();
+
+// Set last indexed slot
+await kvClient.setLastIndexedSlot(slot);
+```
+
+## IPFS Integration
+
+### Proposal Storage
+
+```typescript
+import { uploadProposal, fetchProposal } from './utils/quicknode-ipfs';
+
+// Upload proposal
+const cid = await uploadProposal(proposalData);
+
+// Fetch proposal
+const proposal = await fetchProposal(cid);
+```
+
+## Configuration
+
+### Environment Variables
+
+```bash
+# QuickNode
+QUICKNODE_API_KEY=your_key
+QUICKNODE_SOLANA_ENDPOINT=https://your-solana-endpoint.quiknode.pro/
+QUICKNODE_ARBITRUM_ENDPOINT=https://your-arbitrum-endpoint.quiknode.pro/
+```
+
+### Add-ons
+
+Enable these add-ons in QuickNode dashboard:
+
+| Add-on | Description | Cost |
+|--------|-------------|------|
+| Priority Fees | Auto-attach priority fees | FREE |
+| Fastlane | Improved transaction landing | FREE |
+| MEV Protection | Protection against MEV | FREE |
+| Yellowstone | Real-time subscriptions | $499/mo |
+| KV Store | Key-value storage | Varies |
+
+## Error Handling
+
+### Rate Limiting
+
+QuickNode has rate limits. Handle 429 responses:
+
+```typescript
+if (response.status === 429) {
+  const retryAfter = response.headers['retry-after'];
+  await sleep(retryAfter * 1000);
+  return retryRequest();
+}
+```
+
+### Connection Errors
+
+Handle connection failures:
+
+```typescript
+try {
+  const result = await client.call(request);
+} catch (error) {
+  if (error.code === 'ECONNREFUSED') {
+    // Fallback to public RPC
+    return fallbackClient.call(request);
+  }
+  throw error;
+}
+```
+
+## Monitoring
+
+### Usage Tracking
+
+Track QuickNode credit consumption:
+
+```typescript
+const usage = await getQuickNodeUsage();
+console.log(`Credits used: ${usage.credits}`);
+console.log(`Requests: ${usage.requests}`);
+```
+
+### Health Checks
+
+```typescript
+// Check Solana RPC
+const health = await solanaClient.getHealth();
+if (health !== 'ok') {
+  alert('Solana RPC unhealthy');
+}
+
+// Check Arbitrum RPC
+const block = await arbitrumClient.getBlockNumber();
+if (block === 0) {
+  alert('Arbitrum RPC unhealthy');
+}
+```

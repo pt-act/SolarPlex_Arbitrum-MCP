@@ -1,0 +1,132 @@
+---
+title: Core Concepts
+description: Understand the fundamental concepts that power SolarPlex MCP.
+---
+
+# Core Concepts
+
+Learn the key concepts that make SolarPlex MCP unique.
+
+## Model Context Protocol (MCP)
+
+MCP is a protocol for connecting AI models to external tools and data sources. SolarPlex MCP implements this protocol to enable AI agents to interact with blockchain governance systems.
+
+### Why MCP?
+
+- **Standardized Interface** - Works with any AI assistant
+- **Tool-based** - Each operation is a callable tool
+- **Extensible** - Easy to add new capabilities
+- **Secure** - Framework logic stays protected
+
+## Multi-Chain Architecture
+
+SolarPlex supports both Solana and Arbitrum through a unified interface.
+
+### Chain Selection
+
+| Use Case | Chain | Technology |
+|----------|-------|------------|
+| High throughput | Solana | Anchor/Rust |
+| EVM compatibility | Arbitrum | Stylus/Solidity |
+| Cross-chain | Both | MCP routing |
+
+### Chain Routing
+
+The MCP automatically routes operations to the correct chain based on:
+- Tool name prefix (`solana_*`, `arbitrum_*`)
+- Contract address format
+- Network configuration
+
+## FairScore System
+
+A composite reputation score (0-100) calculated from on-chain factors.
+
+### Score Components
+
+| Component | Weight | Description |
+|-----------|--------|-------------|
+| Active Days | 25% | Days with on-chain activity |
+| Transaction Count | 20% | Total transactions made |
+| LST Holdings | 15% | Liquid Staking Token percentile |
+| Native SOL | 15% | SOL holdings percentile |
+| Stablecoin Holdings | 10% | Stablecoin holdings percentile |
+| Wallet Age | 10% | How long wallet existed |
+| Activity Consistency | 5% | Regular transaction pattern |
+
+### Score Calculation
+
+```typescript
+compositeScore = (activeDays × 0.25) + 
+                 (transactionCount × 0.20) + 
+                 (lstHoldings × 0.15) + 
+                 (nativeSOL × 0.15) + 
+                 (stablecoins × 0.10) + 
+                 (walletAge × 0.10) + 
+                 (consistency × 0.05)
+```
+
+## Quadratic Voting
+
+Voting power formula that prevents whale dominance:
+
+```
+votingPower = √(tokenBalance) × (1 + fairscore/50)
+```
+
+### Example
+
+A member with 10,000 tokens and FairScore of 78:
+
+```
+quadraticBase = √10000 = 100
+reputationMultiplier = 1 + (78/50) = 2.56
+votingPower = 100 × 2.56 = 256
+```
+
+## Reputation Tiers
+
+Members are categorized into tiers based on FairScore:
+
+| Tier | Score Range | Time-Lock | Privileges |
+|------|-------------|-----------|------------|
+| Platinum | 85-100 | 24h | All proposals + Emergency |
+| Gold | 70-84 | 48h | Standard + Expedited |
+| Silver | 50-69 | 72h | Voting rights |
+| Bronze | 30-49 | 168h | Limited participation |
+| Unscored | 0-29 | 336h | Must build reputation |
+
+## ERC-8004 Identity Registry
+
+Arbitrum's on-chain identity system for AI agents.
+
+### Registration
+
+Agents register with:
+- **Name** - Display name
+- **Metadata** - Base64-encoded JSON (description, image)
+- **Attributes** - Key-value pairs (skills, endpoint, price)
+
+### Verification
+
+- On-chain registration
+- Public identity verification
+- Skill-based discovery
+
+## QuickNode Integration
+
+SolarPlex uses QuickNode for high-performance RPC access.
+
+### Features
+
+- **RPC Access** - Low-latency chain interaction
+- **Streams** - Real-time event indexing
+- **Key-Value Store** - Tier management
+- **IPFS** - Proposal storage
+
+### Configuration
+
+```bash
+QUICKNODE_API_KEY=your_key
+QUICKNODE_SOLANA_ENDPOINT=https://your-solana-endpoint.quiknode.pro/
+QUICKNODE_ARBITRUM_ENDPOINT=https://your-arbitrum-endpoint.quiknode.pro/
+```
