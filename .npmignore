@@ -1,0 +1,41 @@
+# Source files
+src/
+docs/
+docs-site/
+scripts/
+
+# Development files
+.env
+.env.local
+.env.*.local
+
+# IDE files
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Test files
+*.test.ts
+*.spec.ts
+__tests__/
+
+# Git files
+.git/
+.gitignore
+
+# Node modules
+node_modules/
+
+# Build artifacts (keep dist)
+tsconfig.tsbuildinfo
+
+# Misc
+*.log
+npm-debug.log*
+
+# CI files
+.github/
+.circleci/

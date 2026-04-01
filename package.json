@@ -1,15 +1,51 @@
 {
   "name": "solarplex-arbitrum-mcp",
   "version": "1.0.0",
-  "description": "Multi-chain MCP for SolarPlex agent - Solana + Arbitrum governance",
+  "description": "Multi-chain MCP for SolarPlex agent - Solana + Arbitrum governance with GMX integration and RepuLayer reputation bridging",
   "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "solarplex-mcp": "dist/index.js"
+  },
+  "files": [
+    "dist/",
+    "README.md",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "solana",
+    "arbitrum",
+    "governance",
+    "dao",
+    "gmx",
+    "reputation",
+    "fairscore",
+    "reputation-weighted",
+    "quadratic-voting",
+    "agent",
+    "ai",
+    "blockchain"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pt-act/SolarPlex_Arbitrum-MCP.git"
+  },
+  "homepage": "https://solar-plex.netlify.app",
+  "license": "MIT",
   "scripts": {
     "build": "tsc",
     "dev": "tsx watch src/index.ts",
     "start": "node dist/index.js",
     "test": "vitest run",
     "lint": "eslint src/",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "audit": "npm audit",
+    "prepublishOnly": "npm run build && npm run audit"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.0",

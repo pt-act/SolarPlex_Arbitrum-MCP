@@ -5,6 +5,10 @@ import { loadConfig } from './config/index.js';
 import { registerSolanaTools } from './tools/solana.js';
 import { registerArbitrumTools } from './tools/arbitrum.js';
 import { registerGovernanceTools } from './tools/governance.js';
+import { registerGMXTools } from './tools/gmx.js';
+import { registerReputationTools } from './tools/reputation.js';
+import { registerDelegateTools } from './tools/delegate.js';
+import { registerAnalyticsTools } from './tools/analytics.js';
 
 const config = loadConfig();
 
@@ -24,6 +28,10 @@ const server = new Server(
 registerSolanaTools(server, config);
 registerArbitrumTools(server, config);
 registerGovernanceTools(server, config);
+registerGMXTools(server, config);
+registerReputationTools(server, config);
+registerDelegateTools(server, config);
+registerAnalyticsTools(server, config);
 
 // Start the server
 async function main() {
