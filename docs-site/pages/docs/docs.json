@@ -18,7 +18,7 @@
   "topbarLinks": [
     {
       "name": "GitHub",
-      "url": "https://github.com/solarplex/mcp"
+      "url": "https://github.com/pt-act/SolarPlex_Arbitrum-MCP"
     }
   ],
   "topbarCtaButton": {
@@ -117,7 +117,7 @@
   ],
   "footerSocials": {
     "twitter": "https://twitter.com/solarplex",
-    "github": "https://github.com/solarplex",
+    "github": "https://github.com/pt-act/SolaPlex_Arbitrum-MCP",
     "discord": "https://discord.gg/solarplex"
   }
 }

@@ -62,7 +62,7 @@ export function loadConfig(): Config {
       arbitrumEndpoint: process.env.QUICKNODE_ARBITRUM_ENDPOINT || '',
     },
     agent: {
-      wallet: process.env.AGENT_WALLET || '0xB28E01A2fECaD4AC1BFa1EA9eBFE9e2Ef9bAdDCc',
+      wallet: process.env.AGENT_WALLET || '0xE0DAD8AD88A1139323C90f0F3c6b2612Be9E1815',
       name: process.env.AGENT_NAME || 'SolarPlex',
     },
   });

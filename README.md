@@ -58,8 +58,8 @@ SolarPlex MCP Server
 
 ```bash
 # Clone the repo
-git clone https://github.com/your-username/solarplex-arbitrum-mcp.git
-cd solarplex-arbitrum-mcp
+git clone https://github.com/pt-act/SolarPlex_Arbitrum-MCP.git
+cd SolarPlex_Arbitrum-MCP
 
 # Install dependencies
 npm install
