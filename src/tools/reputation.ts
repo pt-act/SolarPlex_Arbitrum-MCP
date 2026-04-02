@@ -1,12 +1,69 @@
-import { Server } from '@modelcontextprotocol/sdk/server/index.js';
-import {
-  CallToolRequestSchema,
-  ListToolsRequestSchema,
-} from '@modelcontextprotocol/sdk/types.js';
 import { z } from 'zod';
-import type { Config } from '../config/index.js';
 
-const REPUTATION_TOOLS = [
+/**
+ * RepuLayer reputation source weights for composite score calculation.
+ * 
+ * The composite score is calculated as:
+ * compositeScore = (creddao × 0.4) + (trustlend × 0.3) + (repugate × 0.3)
+ * 
+ * Weight rationale:
+ * - CredDAO (0.4): Governance participation is the primary reputation signal
+ * - TrustLend (0.3): Credit history shows financial responsibility
+ * - RepuGate (0.3): Launch participation shows ecosystem engagement
+ */
+export const REPUTATION_WEIGHTS = {
+  creddao: 0.4,
+  trustlend: 0.3,
+  repugate: 0.3,
+} as const;
+
+/**
+ * Calculates weighted composite reputation score from multiple sources.
+ * 
+ * @param scores - Object with scores from each source (0-100)
+ * @returns Weighted composite score (0-100)
+ * @throws Error if any score is not a finite number
+ */
+export function calculateCompositeScore(scores: {
+  creddao?: number;
+  trustlend?: number;
+  repugate?: number;
+}): number {
+  let totalWeight = 0;
+  let weightedSum = 0;
+  
+  if (scores.creddao !== undefined) {
+    if (!Number.isFinite(scores.creddao)) {
+      throw new Error(`Invalid creddao score: ${scores.creddao}`);
+    }
+    weightedSum += scores.creddao * REPUTATION_WEIGHTS.creddao;
+    totalWeight += REPUTATION_WEIGHTS.creddao;
+  }
+  
+  if (scores.trustlend !== undefined) {
+    if (!Number.isFinite(scores.trustlend)) {
+      throw new Error(`Invalid trustlend score: ${scores.trustlend}`);
+    }
+    weightedSum += scores.trustlend * REPUTATION_WEIGHTS.trustlend;
+    totalWeight += REPUTATION_WEIGHTS.trustlend;
+  }
+  
+  if (scores.repugate !== undefined) {
+    if (!Number.isFinite(scores.repugate)) {
+      throw new Error(`Invalid repugate score: ${scores.repugate}`);
+    }
+    weightedSum += scores.repugate * REPUTATION_WEIGHTS.repugate;
+    totalWeight += REPUTATION_WEIGHTS.repugate;
+  }
+  
+  if (totalWeight === 0) {
+    return 0;
+  }
+  
+  return Math.round(weightedSum / totalWeight);
+}
+
+export const REPUTATION_TOOLS = [
   {
     name: 'governance_get_cross_chain_reputation',
     description: 'Get unified reputation across Solana and Arbitrum via RepuLayer',
@@ -43,204 +100,71 @@ const REPUTATION_TOOLS = [
   },
 ];
 
-export function registerReputationTools(server: Server, config: Config) {
-  server.setRequestHandler(CallToolRequestSchema, async (request) => {
-    const { name, arguments: args } = request.params;
-
-    switch (name) {
-      case 'governance_get_cross_chain_reputation':
-        return await getCrossChainReputation(args as {
-          solanaWallet?: string;
-          arbitrumWallet?: string;
-        });
-      case 'governance_get_reputation_breakdown':
-        return await getReputationBreakdown(args as {
-          wallet: string;
-          chain: string;
-        });
-      case 'governance_compare_reputations':
-        return await compareReputations(args as {
-          wallet1: string;
-          wallet2: string;
-          chain: string;
-        });
-      case 'governance_get_reputation_trend':
-        return await getReputationTrend(args as {
-          wallet: string;
-          chain: string;
-          days: number;
-        });
-      default:
-        throw new Error(`Unknown tool: ${name}`);
-    }
-  });
-}
-
-export { REPUTATION_TOOLS };
-
-async function getCrossChainReputation(args: {
-  solanaWallet?: string;
-  arbitrumWallet?: string;
-}) {
-  // RepuLayer aggregation across CredDAO, TrustLend, RepuGate
-  const reputation: {
-    solana: { fairscore: number | null; tier: string | null; sources: string[] } | null;
-    arbitrum: { fairscore: number | null; tier: string | null; sources: string[] } | null;
-    combined: { score: number | null; tier: string | null };
-  } = {
-    solana: null,
-    arbitrum: null,
-    combined: { score: null, tier: null },
-  };
-
-  if (args.solanaWallet) {
-    reputation.solana = {
-      fairscore: 78,
-      tier: 'gold',
-      sources: ['creddao', 'trustlend', 'repugate'],
-    };
+/**
+ * Handles reputation tool calls.
+ * 
+ * @param name - Tool name
+ * @param args - Tool arguments
+ * @returns MCP response with content array
+ */
+export async function handleReputationTool(name: string, args: any) {
+  switch (name) {
+    case 'governance_get_cross_chain_reputation':
+      return {
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            solanaWallet: args.solanaWallet,
+            arbitrumWallet: args.arbitrumWallet,
+            reputation: {
+              solana: args.solanaWallet ? { fairscore: 0, tier: 'unscored', sources: ['creddao', 'trustlend', 'repugate'], note: 'Connect to RepuLayer to get real data' } : null,
+              arbitrum: args.arbitrumWallet ? { fairscore: 0, tier: 'unscored', sources: ['erc8004'], note: 'Connect to Arbitrum RPC to get real data' } : null,
+              combined: { score: 0, tier: 'unscored' },
+            },
+          }),
+        }],
+      };
+    case 'governance_get_reputation_breakdown':
+      return {
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            wallet: args.wallet,
+            chain: args.chain,
+            sources: {
+              creddao: { fairscore: 0, note: 'Connect to CredDAO to get real data' },
+              trustlend: { creditScore: 0, note: 'Connect to TrustLend to get real data' },
+              repugate: { participationScore: 0, note: 'Connect to RepuGate to get real data' },
+            },
+            composite: { score: 0, tier: 'unscored', formula: '(creddao × 0.4) + (trustlend × 0.3) + (repugate × 0.3)' },
+          }),
+        }],
+      };
+    case 'governance_compare_reputations':
+      return {
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            wallet1: { address: args.wallet1, fairscore: 0, tier: 'unscored' },
+            wallet2: { address: args.wallet2, fairscore: 0, tier: 'unscored' },
+            note: 'Connect to chain RPCs to get real comparison data',
+          }),
+        }],
+      };
+    case 'governance_get_reputation_trend':
+      return {
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            wallet: args.wallet,
+            chain: args.chain,
+            period: `${args.days} days`,
+            dataPoints: [],
+            note: 'Connect to chain RPCs to get real trend data',
+          }),
+        }],
+      };
+    default:
+      throw new Error(`Unknown reputation tool: ${name}`);
   }
-
-  if (args.arbitrumWallet) {
-    reputation.arbitrum = {
-      fairscore: 65,
-      tier: 'silver',
-      sources: ['erc8004'],
-    };
-  }
-
-  // Calculate combined score
-  const scores = [
-    reputation.solana?.fairscore,
-    reputation.arbitrum?.fairscore,
-  ].filter((s): s is number => s !== null);
-
-  if (scores.length > 0) {
-    const avgScore = Math.round(scores.reduce((a, b) => a + b, 0) / scores.length);
-    reputation.combined = {
-      score: avgScore,
-      tier: getTierFromScore(avgScore),
-    };
-  }
-
-  return {
-    content: [{
-      type: 'text' as const,
-      text: JSON.stringify(reputation),
-    }],
-  };
-}
-
-async function getReputationBreakdown(args: {
-  wallet: string;
-  chain: string;
-}) {
-  // RepuLayer breakdown across protocols
-  const breakdown = {
-    wallet: args.wallet,
-    chain: args.chain,
-    sources: {
-      creddao: {
-        fairscore: 78,
-        activeDays: 120,
-        transactionCount: 450,
-        proposalsSubmitted: 5,
-        proposalsVoted: 23,
-        weight: 0.4,
-      },
-      trustlend: {
-        creditScore: 85,
-        repaymentRate: 0.98,
-        loansActive: 2,
-        weight: 0.3,
-      },
-      repugate: {
-        participationScore: 72,
-        allocationsHeld: 3,
-        allocationsDumped: 0,
-        weight: 0.3,
-      },
-    },
-    composite: {
-      score: 78,
-      tier: 'gold',
-      formula: '(creddao × 0.4) + (trustlend × 0.3) + (repugate × 0.3)',
-    },
-  };
-
-  return {
-    content: [{
-      type: 'text' as const,
-      text: JSON.stringify(breakdown),
-    }],
-  };
-}
-
-async function compareReputations(args: {
-  wallet1: string;
-  wallet2: string;
-  chain: string;
-}) {
-  const comparison = {
-    wallet1: {
-      address: args.wallet1,
-      fairscore: 78,
-      tier: 'gold',
-    },
-    wallet2: {
-      address: args.wallet2,
-      fairscore: 65,
-      tier: 'silver',
-    },
-    difference: {
-      scoreDiff: 13,
-      tierDiff: 'gold vs silver',
-      recommendation: 'Wallet 1 has higher governance reputation',
-    },
-  };
-
-  return {
-    content: [{
-      type: 'text' as const,
-      text: JSON.stringify(comparison),
-    }],
-  };
-}
-
-async function getReputationTrend(args: {
-  wallet: string;
-  chain: string;
-  days: number;
-}) {
-  // Simulated trend data
-  const trend = {
-    wallet: args.wallet,
-    chain: args.chain,
-    period: `${args.days} days`,
-    dataPoints: [
-      { date: '2026-03-01', score: 65 },
-      { date: '2026-03-08', score: 68 },
-      { date: '2026-03-15', score: 72 },
-      { date: '2026-03-22', score: 75 },
-      { date: '2026-03-29', score: 78 },
-    ],
-    trend: 'upward',
-    change: '+13',
-    averageGrowth: '+3.25/week',
-  };
-
-  return {
-    content: [{
-      type: 'text' as const,
-      text: JSON.stringify(trend),
-    }],
-  };
-}
-
-function getTierFromScore(score: number): string {
-  if (score >= 85) return 'platinum';
-  if (score >= 70) return 'gold';
-  if (score >= 50) return 'silver';
-  if (score >= 30) return 'bronze';
-  return 'unscored';
 }
