@@ -63,9 +63,13 @@ export async function handleGMXTool(name: string, args: any) {
           type: 'text',
           text: JSON.stringify({
             action: 'open_position',
-            params: args,
-            status: 'ready_to_sign',
-            note: 'Connect wallet to execute transaction on GMX',
+            market: args.market,
+            collateral: args.collateral,
+            size: args.size,
+            isLong: args.isLong,
+            slippage: args.slippage,
+            status: 'requires_wallet_signature',
+            note: 'GMX V2 position opening requires connected wallet with sufficient collateral',
           }),
         }],
       };
@@ -75,9 +79,11 @@ export async function handleGMXTool(name: string, args: any) {
           type: 'text',
           text: JSON.stringify({
             action: 'close_position',
-            params: args,
-            status: 'ready_to_sign',
-            note: 'Connect wallet to execute transaction on GMX',
+            market: args.market,
+            isLong: args.isLong,
+            percentage: args.percentage,
+            status: 'requires_wallet_signature',
+            note: 'GMX V2 position closing requires connected wallet',
           }),
         }],
       };

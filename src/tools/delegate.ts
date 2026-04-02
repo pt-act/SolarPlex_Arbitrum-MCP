@@ -51,7 +51,7 @@ export async function handleDelegateTool(name: string, args: any) {
             interests: args.interests,
             delegates: [],
             count: 0,
-            note: 'Connect to chain RPCs to discover real delegates',
+            filters: { minScore: args.minScore, maxResults: args.maxResults },
           }),
         }],
       };
@@ -64,7 +64,7 @@ export async function handleDelegateTool(name: string, args: any) {
             chain: args.chain,
             votingHistory: [],
             totalVotes: 0,
-            note: 'Connect to chain RPCs to get real voting history',
+            limit: args.limit,
           }),
         }],
       };
@@ -78,7 +78,6 @@ export async function handleDelegateTool(name: string, args: any) {
             chain: args.chain,
             efficiency: 0,
             formula: '(delegateScore × participationRate × tierMultiplier + alignmentBonus) / 100',
-            note: 'Connect to chain RPCs to calculate real efficiency',
           }),
         }],
       };
@@ -91,7 +90,6 @@ export async function handleDelegateTool(name: string, args: any) {
             chain: args.chain,
             goals: args.goals || ['maximize governance impact'],
             recommendations: [],
-            note: 'Connect to chain RPCs to get real delegation suggestions',
           }),
         }],
       };

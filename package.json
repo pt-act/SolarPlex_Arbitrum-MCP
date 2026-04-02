@@ -1,6 +1,6 @@
 {
   "name": "solarplex-arbitrum-mcp",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Multi-chain MCP for SolarPlex agent - Solana, Arbitrum, Polygon, BSC, Ethereum, Base with GMX integration and RepuLayer reputation bridging",
   "type": "module",
   "main": "dist/index.js",

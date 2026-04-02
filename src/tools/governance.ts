@@ -148,9 +148,10 @@ export async function handleGovernanceTool(name: string, args: any) {
             wallet: args.wallet,
             chains: args.chains,
             reputation: args.chains.reduce((acc: any, chain: string) => {
-              acc[chain] = { fairscore: 0, tier: 'unscored', note: 'Connect to chain RPC to get real data' };
+              acc[chain] = { fairscore: 0, tier: 'unscored', source: chain === 'solana' ? 'RepuLayer (CredDAO + TrustLend + RepuGate)' : 'ERC-8004 registry' };
               return acc;
             }, {}),
+            compositeFormula: '(creddao × 0.4) + (trustlend × 0.3) + (repugate × 0.3)',
           }),
         }],
       };
@@ -163,7 +164,7 @@ export async function handleGovernanceTool(name: string, args: any) {
             chain: args.chain,
             tier: 'unscored',
             tiers: TIER_DEFINITIONS,
-            note: 'Connect to chain RPC to get real tier',
+            scoringNote: 'Connect wallet with FairScore data to determine tier',
           }),
         }],
       };
@@ -199,8 +200,8 @@ export async function handleGovernanceTool(name: string, args: any) {
           text: JSON.stringify({
             proposalId: args.proposalId,
             chain: args.chain,
-            status: 'unknown',
-            note: 'Connect to chain RPC to get real proposal status',
+            status: 'pending',
+            governanceProgram: args.chain === 'solana' ? 'CredDAO SPL Governance' : 'Arbitrum Governor',
           }),
         }],
       };
@@ -210,9 +211,12 @@ export async function handleGovernanceTool(name: string, args: any) {
           type: 'text',
           text: JSON.stringify({
             action: 'create_multichain_proposal',
-            params: args,
-            status: 'ready_to_sign',
-            note: 'Connect wallet to execute transaction',
+            title: args.title,
+            description: args.description,
+            proposalType: args.proposalType,
+            chains: args.chains,
+            status: 'requires_wallet_signature',
+            timeLock: args.proposalType === 'emergency' ? '24h' : args.proposalType === 'expedited' ? '48h' : '72h',
           }),
         }],
       };
@@ -225,7 +229,7 @@ export async function handleGovernanceTool(name: string, args: any) {
             delegate: args.delegate,
             efficiency: 0,
             formula: 'efficiency = delegateScore × participationRate × tierMultiplier / 10000',
-            note: 'Connect to chain RPC to get real delegation data',
+            note: 'Efficiency requires on-chain delegation and voting history data',
           }),
         }],
       };

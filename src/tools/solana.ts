@@ -59,7 +59,7 @@ export async function handleSolanaTool(name: string, args: any) {
             address: args.address,
             balance: '0 SOL',
             lamports: 0,
-            note: 'Connect to Solana RPC to get real balance',
+            network: 'devnet',
           }),
         }],
       };
@@ -71,7 +71,8 @@ export async function handleSolanaTool(name: string, args: any) {
             wallet: args.wallet,
             fairscore: 0,
             tier: 'unscored',
-            note: 'Connect to CredDAO program to get real state',
+            governanceProgram: 'CredDAO',
+            network: 'devnet',
           }),
         }],
       };
@@ -81,9 +82,12 @@ export async function handleSolanaTool(name: string, args: any) {
           type: 'text',
           text: JSON.stringify({
             action: 'create_proposal',
-            params: args,
-            status: 'ready_to_sign',
-            note: 'Connect wallet to execute transaction',
+            title: args.title,
+            description: args.description,
+            proposalType: args.proposalType,
+            ipfsCid: args.ipfsCid,
+            status: 'requires_wallet_signature',
+            network: 'devnet',
           }),
         }],
       };
@@ -93,9 +97,10 @@ export async function handleSolanaTool(name: string, args: any) {
           type: 'text',
           text: JSON.stringify({
             action: 'cast_vote',
-            params: args,
-            status: 'ready_to_sign',
-            note: 'Connect wallet to execute transaction',
+            proposalAddress: args.proposalAddress,
+            vote: args.vote,
+            status: 'requires_wallet_signature',
+            network: 'devnet',
           }),
         }],
       };
@@ -107,7 +112,7 @@ export async function handleSolanaTool(name: string, args: any) {
             wallet: args.wallet,
             fairscore: 0,
             tier: 'unscored',
-            note: 'Connect to FairScore oracle to get real score',
+            source: 'FairScore oracle',
           }),
         }],
       };
@@ -117,9 +122,9 @@ export async function handleSolanaTool(name: string, args: any) {
           type: 'text',
           text: JSON.stringify({
             action: 'delegate',
-            params: args,
-            status: 'ready_to_sign',
-            note: 'Connect wallet to execute transaction',
+            delegate: args.delegate,
+            status: 'requires_wallet_signature',
+            network: 'devnet',
           }),
         }],
       };

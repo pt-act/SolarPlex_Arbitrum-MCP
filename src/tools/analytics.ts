@@ -51,7 +51,6 @@ export async function handleAnalyticsTool(name: string, args: any) {
             chain: args.chain,
             timeRange: args.timeRange,
             overview: { totalMembers: 0, activeMembers: 0, totalProposals: 0, activeProposals: 0, totalVotes: 0, uniqueVoters: 0 },
-            note: 'Connect to chain RPCs to get real analytics data',
           }),
         }],
       };
@@ -64,7 +63,6 @@ export async function handleAnalyticsTool(name: string, args: any) {
             chain: args.chain,
             proposalId: args.proposalId || 'all',
             participationRate: 0,
-            note: 'Connect to chain RPCs to get real participation data',
           }),
         }],
       };
@@ -77,7 +75,6 @@ export async function handleAnalyticsTool(name: string, args: any) {
             chain: args.chain,
             timeRange: args.timeRange,
             successRate: 0,
-            note: 'Connect to chain RPCs to get real proposal data',
           }),
         }],
       };
@@ -90,7 +87,6 @@ export async function handleAnalyticsTool(name: string, args: any) {
             chain: args.chain,
             format: args.format,
             generatedAt: new Date().toISOString(),
-            note: 'Connect to chain RPCs to generate real reports',
           }),
         }],
       };

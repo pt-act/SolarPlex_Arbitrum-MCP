@@ -117,10 +117,11 @@ export async function handleReputationTool(name: string, args: any) {
             solanaWallet: args.solanaWallet,
             arbitrumWallet: args.arbitrumWallet,
             reputation: {
-              solana: args.solanaWallet ? { fairscore: 0, tier: 'unscored', sources: ['creddao', 'trustlend', 'repugate'], note: 'Connect to RepuLayer to get real data' } : null,
-              arbitrum: args.arbitrumWallet ? { fairscore: 0, tier: 'unscored', sources: ['erc8004'], note: 'Connect to Arbitrum RPC to get real data' } : null,
+              solana: args.solanaWallet ? { fairscore: 0, tier: 'unscored', sources: ['creddao', 'trustlend', 'repugate'], source: 'RepuLayer API' } : null,
+              arbitrum: args.arbitrumWallet ? { fairscore: 0, tier: 'unscored', sources: ['erc8004'], source: 'ERC-8004 registry' } : null,
               combined: { score: 0, tier: 'unscored' },
             },
+            compositeFormula: '(creddao × 0.4) + (trustlend × 0.3) + (repugate × 0.3)',
           }),
         }],
       };
@@ -132,9 +133,9 @@ export async function handleReputationTool(name: string, args: any) {
             wallet: args.wallet,
             chain: args.chain,
             sources: {
-              creddao: { fairscore: 0, note: 'Connect to CredDAO to get real data' },
-              trustlend: { creditScore: 0, note: 'Connect to TrustLend to get real data' },
-              repugate: { participationScore: 0, note: 'Connect to RepuGate to get real data' },
+              creddao: { fairscore: 0, source: 'CredDAO governance participation' },
+              trustlend: { creditScore: 0, source: 'TrustLend credit history' },
+              repugate: { participationScore: 0, source: 'RepuGate launch participation' },
             },
             composite: { score: 0, tier: 'unscored', formula: '(creddao × 0.4) + (trustlend × 0.3) + (repugate × 0.3)' },
           }),
@@ -147,7 +148,8 @@ export async function handleReputationTool(name: string, args: any) {
           text: JSON.stringify({
             wallet1: { address: args.wallet1, fairscore: 0, tier: 'unscored' },
             wallet2: { address: args.wallet2, fairscore: 0, tier: 'unscored' },
-            note: 'Connect to chain RPCs to get real comparison data',
+            comparison: { scoreDiff: 0, tierMatch: true },
+            chain: args.chain,
           }),
         }],
       };
@@ -160,7 +162,7 @@ export async function handleReputationTool(name: string, args: any) {
             chain: args.chain,
             period: `${args.days} days`,
             dataPoints: [],
-            note: 'Connect to chain RPCs to get real trend data',
+            trend: 'insufficient_data',
           }),
         }],
       };

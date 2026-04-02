@@ -1,4 +1,14 @@
 import { z } from 'zod';
+import { createPublicClient, http, formatEther, type Address, type Hex } from 'viem';
+import { arbitrum, arbitrumSepolia } from 'viem/chains';
+
+function getPublicClient(network: 'mainnet' | 'sepolia' = 'mainnet') {
+  const chain = network === 'sepolia' ? arbitrumSepolia : arbitrum;
+  const rpcUrl = network === 'sepolia'
+    ? (process.env.ARBITRUM_SEPOLIA_RPC_URL || 'https://sepolia-rollup.arbitrum.io/rpc')
+    : (process.env.ARBITRUM_RPC_URL || 'https://arbitrum.drpc.org');
+  return createPublicClient({ chain, transport: http(rpcUrl) });
+}
 
 export const ARBITRUM_TOOLS = [
   {
@@ -69,39 +79,51 @@ export const ARBITRUM_TOOLS = [
 
 export async function handleArbitrumTool(name: string, args: any) {
   switch (name) {
-    case 'arbitrum_register_agent':
+    case 'arbitrum_register_agent': {
+      const registry = process.env.ARBITRUM_IDENTITY_REGISTRY || '0x8004A169FB4a3325136EB29fA0ceB6D2e539a432';
       return {
         content: [{
           type: 'text',
           text: JSON.stringify({
             action: 'register_agent',
-            params: args,
-            status: 'ready_to_sign',
-            note: 'Use scripts/register-agent.ts with private key',
+            name: args.name,
+            description: args.description,
+            skills: args.skills,
+            endpoint: args.endpoint,
+            registry,
+            chain: 'arbitrum',
+            status: 'requires_wallet_signature',
+            script: 'scripts/register-agent.ts',
           }),
         }],
       };
-    case 'arbitrum_get_balance':
+    }
+    case 'arbitrum_get_balance': {
+      const publicClient = getPublicClient();
+      const balance = await publicClient.getBalance({ address: args.address as Address });
       return {
         content: [{
           type: 'text',
           text: JSON.stringify({
             address: args.address,
-            balance: '0 ETH',
-            wei: '0',
-            note: 'Connect to Arbitrum RPC to get real balance',
+            balance: `${formatEther(balance)} ETH`,
+            wei: balance.toString(),
+            chain: 'arbitrum',
+            chainId: 42161,
           }),
         }],
       };
+    }
     case 'arbitrum_deploy_stylus':
       return {
         content: [{
           type: 'text',
           text: JSON.stringify({
             action: 'deploy_stylus',
-            params: args,
-            command: `cargo stylus deploy --endpoint https://sepolia-rollup.arbitrum.io/rpc --private-key $PRIVATE_KEY`,
-            note: 'Requires cargo-stylus CLI and private key',
+            contractPath: args.contractPath,
+            network: args.network,
+            command: `cargo stylus deploy --endpoint ${args.network === 'sepolia' ? 'https://sepolia-rollup.arbitrum.io/rpc' : 'https://arb1.arbitrum.io/rpc'} --private-key $PRIVATE_KEY`,
+            prerequisites: ['cargo-stylus CLI', 'Rust toolchain', 'Private key in $PRIVATE_KEY'],
           }),
         }],
       };
@@ -111,31 +133,44 @@ export async function handleArbitrumTool(name: string, args: any) {
           type: 'text',
           text: JSON.stringify({
             action: 'deploy_solidity',
-            params: args,
-            command: `forge script script/Deploy.s.sol --rpc-url https://sepolia-rollup.arbitrum.io/rpc --broadcast --private-key $PRIVATE_KEY`,
-            note: 'Requires Foundry and private key',
+            contractName: args.contractName,
+            constructorArgs: args.constructorArgs || [],
+            network: args.network,
+            command: `forge script script/Deploy.s.sol --rpc-url ${args.network === 'sepolia' ? 'https://sepolia-rollup.arbitrum.io/rpc' : 'https://arb1.arbitrum.io/rpc'} --broadcast --private-key $PRIVATE_KEY`,
+            prerequisites: ['Foundry (forge)', 'Private key in $PRIVATE_KEY'],
           }),
         }],
       };
-    case 'arbitrum_read_contract':
+    case 'arbitrum_read_contract': {
+      const publicClient = getPublicClient();
+      const result = await publicClient.readContract({
+        address: args.address as Address,
+        abi: args.abi,
+        functionName: args.functionName,
+        args: args.args,
+      });
       return {
         content: [{
           type: 'text',
           text: JSON.stringify({
-            action: 'read_contract',
-            params: args,
-            note: 'Connect to Arbitrum RPC to read contract',
+            address: args.address,
+            functionName: args.functionName,
+            result: typeof result === 'bigint' ? result.toString() : result,
           }),
         }],
       };
+    }
     case 'arbitrum_write_contract':
       return {
         content: [{
           type: 'text',
           text: JSON.stringify({
             action: 'write_contract',
-            params: args,
-            note: 'Connect wallet to execute transaction',
+            address: args.address,
+            functionName: args.functionName,
+            args: args.args || [],
+            status: 'requires_wallet_signature',
+            note: 'Write operations require a connected wallet. Use viem walletClient or scripts/ for signing.',
           }),
         }],
       };
@@ -145,8 +180,12 @@ export async function handleArbitrumTool(name: string, args: any) {
           type: 'text',
           text: JSON.stringify({
             action: 'bridge_assets',
-            params: args,
-            note: 'Use Arbitrum bridge: https://bridge.arbitrum.io/',
+            fromChain: args.fromChain,
+            toChain: args.toChain,
+            tokenAddress: args.tokenAddress,
+            amount: args.amount,
+            bridgeUrl: 'https://bridge.arbitrum.io/',
+            status: 'requires_wallet_signature',
           }),
         }],
       };

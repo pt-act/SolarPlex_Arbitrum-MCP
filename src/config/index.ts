@@ -17,9 +17,9 @@ export const ConfigSchema = z.object({
     reputationRegistry: z.string().default('0x8004BAa17C55a88189AE136b182e5fdA19dE9b63'),
   }),
   quicknode: z.object({
-    apiKey: z.string(),
-    solanaEndpoint: z.string().url(),
-    arbitrumEndpoint: z.string().url(),
+    apiKey: z.string().optional().default(''),
+    solanaEndpoint: z.string().url().optional().default('https://api.devnet.solana.com'),
+    arbitrumEndpoint: z.string().url().optional().default('https://arbitrum.drpc.org'),
   }),
   agent: z.object({
     wallet: z.string().regex(/^0x[a-fA-F0-9]{40}$/),
@@ -42,7 +42,7 @@ export type Config = z.infer<typeof ConfigSchema>;
 export function loadConfig(): Config {
   return ConfigSchema.parse({
     solana: {
-      rpcUrl: process.env.SOLANA_RPC_URL || 'https://api.mainnet-beta.solana.com',
+      rpcUrl: process.env.SOLANA_RPC_URL || 'https://api.devnet.solana.com',
       wsUrl: process.env.SOLANA_WS_URL,
       programId: process.env.SOLANA_PROGRAM_ID || 'CreDDAo111111111111111111111111111111111111',
       fairscoreProgramId: process.env.FAIRSCORE_PROGRAM_ID || 'Faire11111111111111111111111111111111111111',
@@ -58,8 +58,8 @@ export function loadConfig(): Config {
     },
     quicknode: {
       apiKey: process.env.QUICKNODE_API_KEY || '',
-      solanaEndpoint: process.env.QUICKNODE_SOLANA_ENDPOINT || '',
-      arbitrumEndpoint: process.env.QUICKNODE_ARBITRUM_ENDPOINT || '',
+      solanaEndpoint: process.env.QUICKNODE_SOLANA_ENDPOINT,
+      arbitrumEndpoint: process.env.QUICKNODE_ARBITRUM_ENDPOINT,
     },
     agent: {
       wallet: process.env.AGENT_WALLET || '0xE0DAD8AD88A1139323C90f0F3c6b2612Be9E1815',

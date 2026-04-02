@@ -69,7 +69,7 @@ const config = loadConfig();
 const server = new Server(
   {
     name: 'solarplex-arbitrum-mcp',
-    version: '1.0.0',
+    version: '1.2.0',
   },
   {
     capabilities: {
