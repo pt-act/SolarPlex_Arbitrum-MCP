@@ -3,12 +3,12 @@
 [![npm version](https://img.shields.io/npm/v/solarplex-arbitrum-mcp)](https://www.npmjs.com/package/solarplex-arbitrum-mcp)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Multi-chain MCP (Model Context Protocol) for the SolarPlex agent, enabling AI-powered governance operations across Solana and Arbitrum.
+Multi-chain MCP (Model Context Protocol) for the SolarPlex agent, enabling AI-powered operations across Solana, Arbitrum, Polygon, BSC, Ethereum, and Base.
 
 ## Overview
 
 SolarPlex MCP extends the CredDAO governance platform with multi-chain capabilities, allowing AI agents to:
-- Deploy and interact with smart contracts on both Solana and Arbitrum
+- Deploy and interact with smart contracts on Solana, Arbitrum, Polygon, BSC, Ethereum, and Base
 - Manage reputation-weighted governance across chains
 - Register on ERC-8004 identity registry (Arbitrum)
 - Bridge assets between chains
@@ -16,6 +16,18 @@ SolarPlex MCP extends the CredDAO governance platform with multi-chain capabilit
 - Aggregate reputation via RepuLayer (CredDAO + TrustLend + RepuGate)
 - Discover delegates based on voting history and interests
 - Generate governance analytics for DAO operators
+
+## Supported Chains
+
+| Chain | Chain ID | QuickNode Status |
+|-------|----------|------------------|
+| Solana | Devnet | ✅ Connected |
+| Arbitrum One | 42161 | ✅ Connected |
+| Arbitrum Sepolia | 421614 | ✅ Connected |
+| Polygon | 137 | ✅ Connected |
+| BSC | 56 | ✅ Connected |
+| Ethereum | 1 | ✅ Connected |
+| Base | 8453 | ✅ Connected |
 
 ## Architecture
 
@@ -144,10 +156,30 @@ npm start
 ## Configuration
 
 Configure via `.env` file (see `.env.example`):
-- Solana RPC/WebSocket endpoints
-- Arbitrum RPC/WebSocket endpoints
-- QuickNode API keys
-- Agent wallet address
+
+```bash
+# Solana
+SOLANA_RPC_URL=https://api.devnet.solana.com
+
+# Arbitrum
+ARBITRUM_RPC_URL=https://your-arbitrum-endpoint.quiknode.pro/...
+ARBITRUM_SEPOLIA_RPC_URL=https://your-arbitrum-sepolia-endpoint.quiknode.pro/...
+
+# Polygon
+POLYGON_RPC_URL=https://your-polygon-endpoint.quiknode.pro/...
+
+# BSC
+BSC_RPC_URL=https://your-bsc-endpoint.quiknode.pro/...
+
+# Ethereum
+ETHEREUM_RPC_URL=https://your-ethereum-endpoint.quiknode.pro/...
+
+# Base
+BASE_RPC_URL=https://your-base-endpoint.quiknode.pro/...
+
+# QuickNode API Key
+QUICKNODE_API_KEY=your_api_key
+```
 
 ## Usage with Claude
 
@@ -156,11 +188,15 @@ Configure via `.env` file (see `.env.example`):
 ```json
 {
   "mcpServers": {
-    "solarplex-arbitrum": {
+    "solarplex": {
       "command": "solarplex-mcp",
       "env": {
-        "SOLANA_RPC_URL": "https://your-quicknode-solana-endpoint.quiknode.pro/",
-        "ARBITRUM_RPC_URL": "https://your-quicknode-arbitrum-endpoint.quiknode.pro/"
+        "SOLANA_RPC_URL": "https://your-solana-endpoint.quiknode.pro/",
+        "ARBITRUM_RPC_URL": "https://your-arbitrum-endpoint.quiknode.pro/",
+        "POLYGON_RPC_URL": "https://your-polygon-endpoint.quiknode.pro/",
+        "BSC_RPC_URL": "https://your-bsc-endpoint.quiknode.pro/",
+        "ETHEREUM_RPC_URL": "https://your-ethereum-endpoint.quiknode.pro/",
+        "BASE_RPC_URL": "https://your-base-endpoint.quiknode.pro/"
       }
     }
   }
@@ -172,12 +208,16 @@ Configure via `.env` file (see `.env.example`):
 ```json
 {
   "mcpServers": {
-    "solarplex-arbitrum": {
+    "solarplex": {
       "command": "node",
       "args": ["/path/to/solarplex-arbitrum-mcp/dist/index.js"],
       "env": {
-        "SOLANA_RPC_URL": "https://your-quicknode-solana-endpoint.quiknode.pro/",
-        "ARBITRUM_RPC_URL": "https://your-quicknode-arbitrum-endpoint.quiknode.pro/"
+        "SOLANA_RPC_URL": "https://your-solana-endpoint.quiknode.pro/",
+        "ARBITRUM_RPC_URL": "https://your-arbitrum-endpoint.quiknode.pro/",
+        "POLYGON_RPC_URL": "https://your-polygon-endpoint.quiknode.pro/",
+        "BSC_RPC_URL": "https://your-bsc-endpoint.quiknode.pro/",
+        "ETHEREUM_RPC_URL": "https://your-ethereum-endpoint.quiknode.pro/",
+        "BASE_RPC_URL": "https://your-base-endpoint.quiknode.pro/"
       }
     }
   }

@@ -1,7 +1,7 @@
 {
   "name": "solarplex-arbitrum-mcp",
-  "version": "1.0.0",
-  "description": "Multi-chain MCP for SolarPlex agent - Solana + Arbitrum governance with GMX integration and RepuLayer reputation bridging",
+  "version": "1.1.0",
+  "description": "Multi-chain MCP for SolarPlex agent - Solana, Arbitrum, Polygon, BSC, Ethereum, Base with GMX integration and RepuLayer reputation bridging",
   "type": "module",
   "main": "dist/index.js",
   "bin": {
@@ -20,6 +20,10 @@
     "model-context-protocol",
     "solana",
     "arbitrum",
+    "polygon",
+    "bsc",
+    "ethereum",
+    "base",
     "governance",
     "dao",
     "gmx",
@@ -29,7 +33,8 @@
     "quadratic-voting",
     "agent",
     "ai",
-    "blockchain"
+    "blockchain",
+    "cross-chain"
   ],
   "repository": {
     "type": "git",
