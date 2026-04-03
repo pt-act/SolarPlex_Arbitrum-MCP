@@ -3,7 +3,7 @@
 [![npm version](https://img.shields.io/npm/v/solarplex-arbitrum-mcp)](https://www.npmjs.com/package/solarplex-arbitrum-mcp)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Live Endpoint](https://img.shields.io/badge/Live-Railway-green)](https://solarplex-arbitrum-mcp-production.up.railway.app)
-[![(https://solar-plex.netlify.app)]
+
 
 Multi-chain MCP server enabling AI agents to interact with **Arbitrum** — ERC-8004 identity registration, GMX ecosystem integration, cross-chain reputation via RepuLayer, and 37 governance tools across 6 chains.
 
@@ -43,7 +43,7 @@ npm install -g solarplex-arbitrum-mcp
 
 ## What This Is
 
-SolarPlex MCP is the **Arbitrum bridge** for the SolArPlex AI agent ecosystem. It connects AI agents to:
+SolarPlex MCP is the **Arbitrum bridge** for the SolArPlex AI agent ecosystem https://solar-plex.netlify.app. It connects AI agents to:
 
 - **Arbitrum chain** — read balances, deploy contracts, register identities (ERC-8004)
 - **GMX V2** — real-time prices, markets, open interest from the GMX oracle
