@@ -1,7 +1,7 @@
 import { z } from 'zod';
-import { createPublicClient, createWalletClient, http, formatEther, type Address, type Hex, stringToHex, toHex, parseEther } from 'viem';
+import { createPublicClient, http, formatEther, type Address, type Hex, stringToHex, toHex, parseEther } from 'viem';
 import { arbitrum, arbitrumSepolia } from 'viem/chains';
-import { privateKeyToAccount } from 'viem/accounts';
+import { createSecureWalletClient, checkWritePermission, logOperation, generateEphemeralKey, getSecurityStatus } from '../security.js';
 
 function getPublicClient(network: 'mainnet' | 'sepolia' = 'mainnet') {
   const chain = network === 'sepolia' ? arbitrumSepolia : arbitrum;
@@ -11,27 +11,16 @@ function getPublicClient(network: 'mainnet' | 'sepolia' = 'mainnet') {
   return createPublicClient({ chain, transport: http(rpcUrl) });
 }
 
-function getWalletClient(network: 'mainnet' | 'sepolia' = 'sepolia') {
-  const privateKey = process.env.AGENT_PRIVATE_KEY;
-  if (!privateKey) return null;
-  const key = privateKey.startsWith('0x') ? privateKey : `0x${privateKey}`;
-  const account = privateKeyToAccount(key as `0x${string}`);
-  const chain = network === 'sepolia' ? arbitrumSepolia : arbitrum;
-  const rpcUrl = network === 'sepolia'
-    ? (process.env.ARBITRUM_SEPOLIA_RPC_URL || 'https://sepolia-rollup.arbitrum.io/rpc')
-    : (process.env.ARBITRUM_RPC_URL || 'https://arbitrum.drpc.org');
-  return createWalletClient({ account, chain, transport: http(rpcUrl) });
-}
-
 export const ARBITRUM_TOOLS = [
   {
     name: 'arbitrum_register_agent',
-    description: 'Register agent on Arbitrum ERC-8004 identity registry',
+    description: 'Register agent on Arbitrum ERC-8004 identity registry (signed tx on Sepolia)',
     inputSchema: z.object({
       name: z.string(),
       description: z.string(),
       skills: z.array(z.string()),
       endpoint: z.string().optional(),
+      dryRun: z.boolean().optional().default(false),
     }),
   },
   {
@@ -70,12 +59,13 @@ export const ARBITRUM_TOOLS = [
   },
   {
     name: 'arbitrum_write_contract',
-    description: 'Write to an Arbitrum contract',
+    description: 'Write to an Arbitrum contract (requires wallet signature)',
     inputSchema: z.object({
       address: z.string(),
       abi: z.array(z.any()),
       functionName: z.string(),
       args: z.array(z.any()).optional(),
+      dryRun: z.boolean().optional().default(false),
     }),
   },
   {
@@ -88,15 +78,27 @@ export const ARBITRUM_TOOLS = [
       amount: z.string(),
     }),
   },
+  {
+    name: 'arbitrum_security_status',
+    description: 'Get wallet security status, rate limits, and configuration',
+    inputSchema: z.object({}),
+  },
+  {
+    name: 'arbitrum_generate_ephemeral_key',
+    description: 'Generate a temporary key for session-based operations (not persisted)',
+    inputSchema: z.object({}),
+  },
 ];
 
 export async function handleArbitrumTool(name: string, args: any) {
   switch (name) {
     case 'arbitrum_register_agent': {
       const registry = process.env.ARBITRUM_IDENTITY_REGISTRY || '0x8004A818BFB912233c491871b3d84c89A494BD9e';
-      const walletClient = getWalletClient('sepolia');
+      const network = 'sepolia';
 
-      if (!walletClient) {
+      const { client, error: walletError, address } = createSecureWalletClient(network);
+
+      if (walletError || !client) {
         return {
           content: [{
             type: 'text',
@@ -107,13 +109,42 @@ export async function handleArbitrumTool(name: string, args: any) {
               skills: args.skills,
               endpoint: args.endpoint,
               registry,
-              chain: 'arbitrum-sepolia',
-              status: 'no_wallet_configured',
+              chain: `arbitrum-${network}`,
+              status: 'wallet_error',
+              error: walletError,
               note: 'Set AGENT_PRIVATE_KEY env var to enable on-chain registration',
             }),
           }],
         };
       }
+
+      const rateCheck = checkWritePermission('register_agent', network);
+      if (!rateCheck.allowed) {
+        return {
+          content: [{
+            type: 'text',
+            text: JSON.stringify({
+              action: 'register_agent',
+              status: 'rate_limited',
+              error: rateCheck.error,
+              retryAfter: rateCheck.retryAfter,
+            }),
+          }],
+        };
+      }
+
+      const metadata = {
+        name: args.name || 'SolarPlex',
+        description: args.description || 'Multi-chain governance agent',
+        image: ''
+      };
+      const metadataParam = `data:application/json;base64,${Buffer.from(JSON.stringify(metadata)).toString('base64')}`;
+
+      const attributes = [
+        { key: 'skills', value: stringToHex((args.skills || []).join(',')) },
+        { key: 'endpoint', value: stringToHex(args.endpoint || 'https://solar-plex.netlify.app') },
+        { key: 'priceWei', value: toHex(parseEther('0.001'), { size: 32 }) }
+      ];
 
       const ERC8004_ABI = [{
         inputs: [
@@ -129,26 +160,41 @@ export async function handleArbitrumTool(name: string, args: any) {
         type: 'function'
       }];
 
-      const metadata = {
-        name: args.name || 'SolarPlex',
-        description: args.description || 'Multi-chain governance agent',
-        image: ''
-      };
-      const metadataParam = `data:application/json;base64,${Buffer.from(JSON.stringify(metadata)).toString('base64')}`;
+      if (args.dryRun) {
+        return {
+          content: [{
+            type: 'text',
+            text: JSON.stringify({
+              action: 'register_agent',
+              mode: 'dry_run',
+              name: args.name,
+              description: args.description,
+              skills: args.skills,
+              endpoint: args.endpoint,
+              registry,
+              chain: `arbitrum-${network}`,
+              signer: address,
+              callData: {
+                abi: ERC8004_ABI,
+                functionName: 'register',
+                args: [metadataParam, attributes],
+                value: '0',
+              },
+              note: 'Dry run — no transaction was sent. Remove dryRun: true to execute.',
+            }),
+          }],
+        };
+      }
 
-      const attributes = [
-        { key: 'skills', value: stringToHex((args.skills || []).join(',')) },
-        { key: 'endpoint', value: stringToHex(args.endpoint || 'https://solar-plex.netlify.app') },
-        { key: 'priceWei', value: toHex(parseEther('0.001'), { size: 32 }) }
-      ];
-
-      const tx = await walletClient.writeContract({
+      const tx = await client.writeContract({
         address: registry as Address,
         abi: ERC8004_ABI,
         functionName: 'register',
         args: [metadataParam, attributes],
         value: 0n,
       });
+
+      logOperation('register_agent', network, tx, address!);
 
       return {
         content: [{
@@ -160,7 +206,8 @@ export async function handleArbitrumTool(name: string, args: any) {
             skills: args.skills,
             endpoint: args.endpoint,
             registry,
-            chain: 'arbitrum-sepolia',
+            chain: `arbitrum-${network}`,
+            signer: address,
             status: 'confirmed',
             transactionHash: tx,
             explorerUrl: `https://sepolia.arbiscan.io/tx/${tx}`,
@@ -257,6 +304,23 @@ export async function handleArbitrumTool(name: string, args: any) {
             amount: args.amount,
             bridgeUrl: 'https://bridge.arbitrum.io/',
             status: 'requires_wallet_signature',
+          }),
+        }],
+      };
+    case 'arbitrum_security_status':
+      return {
+        content: [{
+          type: 'text',
+          text: JSON.stringify(getSecurityStatus()),
+        }],
+      };
+    case 'arbitrum_generate_ephemeral_key':
+      return {
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            ...generateEphemeralKey(),
+            warning: 'This key is NOT stored server-side. Use it for this session only.',
           }),
         }],
       };
