@@ -2,188 +2,187 @@
 
 [![npm version](https://img.shields.io/npm/v/solarplex-arbitrum-mcp)](https://www.npmjs.com/package/solarplex-arbitrum-mcp)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Live Endpoint](https://img.shields.io/badge/Live-Railway-green)](https://solarplex-arbitrum-mcp-production.up.railway.app)
 
-Multi-chain MCP (Model Context Protocol) for the SolarPlex agent, enabling AI-powered operations across Solana, Arbitrum, Polygon, BSC, Ethereum, and Base.
+Multi-chain MCP server enabling AI agents to interact with **Arbitrum** — ERC-8004 identity registration, GMX ecosystem integration, cross-chain reputation via RepuLayer, and 37 governance tools across 6 chains.
 
-## Overview
+**Live endpoint:** https://solarplex-arbitrum-mcp-production.up.railway.app
 
-SolarPlex MCP extends the CredDAO governance platform with multi-chain capabilities, allowing AI agents to:
-- Deploy and interact with smart contracts on Solana, Arbitrum, Polygon, BSC, Ethereum, and Base
-- Manage reputation-weighted governance across chains
-- Register on ERC-8004 identity registry (Arbitrum)
-- Bridge assets between chains
-- Integrate with GMX (Arbitrum ecosystem protocol)
-- Aggregate reputation via RepuLayer (CredDAO + TrustLend + RepuGate)
-- Discover delegates based on voting history and interests
-- Generate governance analytics for DAO operators
+---
 
-## Supported Chains
+## Quick Start
 
-| Chain | Chain ID | QuickNode Status |
-|-------|----------|------------------|
-| Solana | Devnet | ✅ Connected |
-| Arbitrum One | 42161 | ✅ Connected |
-| Arbitrum Sepolia | 421614 | ✅ Connected |
-| Polygon | 137 | ✅ Connected |
-| BSC | 56 | ✅ Connected |
-| Ethereum | 1 | ✅ Connected |
-| Base | 8453 | ✅ Connected |
+### Try it now (no install needed)
 
-## Architecture
+```bash
+# Health check
+curl https://solarplex-arbitrum-mcp-production.up.railway.app/
 
-```
-SolarPlex MCP Server
-├── Solana Tools:
-│   ├── solana_get_balance → Get wallet balance
-│   ├── solana_get_governance_state → Get governance state
-│   ├── solana_create_proposal → Create proposal
-│   ├── solana_cast_vote → Cast vote
-│   ├── solana_get_fairscore → Get FairScore
-│   └── solana_delegate → Delegate voting power
-├── Arbitrum Tools:
-│   ├── arbitrum_register_agent → Register on ERC-8004
-│   ├── arbitrum_get_balance → Get ETH balance
-│   ├── arbitrum_deploy_stylus → Deploy Stylus contract
-│   ├── arbitrum_deploy_solidity → Deploy Solidity contract
-│   ├── arbitrum_read_contract → Read from contract
-│   ├── arbitrum_write_contract → Write to contract
-│   └── arbitrum_bridge_assets → Bridge assets
-├── GMX Tools (Arbitrum Ecosystem):
-│   ├── gmx_get_prices → Get token prices from GMX oracle
-│   ├── gmx_get_positions → Get open positions
-│   ├── gmx_open_position → Open leveraged position
-│   ├── gmx_close_position → Close position
-│   ├── gmx_get_markets → Get available markets
-│   └── gmx_get_open_interest → Get open interest
-├── Reputation Tools (RepuLayer Bridge):
-│   ├── governance_get_cross_chain_reputation → Unified reputation
-│   ├── governance_get_reputation_breakdown → Detailed breakdown
-│   ├── governance_compare_reputations → Compare wallets
-│   └── governance_get_reputation_trend → Score trend
-└── Governance Tools:
-    ├── governance_get_reputation → Cross-chain reputation
-    ├── governance_get_tier → Governance tier
-    ├── governance_calculate_voting_power → Voting power
-    ├── governance_get_proposal_status → Proposal status
-    ├── governance_create_multichain_proposal → Multi-chain proposal
-    └── governance_get_delegation_efficiency → Delegation efficiency
+# List all tools
+curl https://solarplex-arbitrum-mcp-production.up.railway.app/tools
+
+# Chat naturally
+curl -X POST https://solarplex-arbitrum-mcp-production.up.railway.app/chat \
+  -H "Content-Type: application/json" \
+  -d '{"message": "Show GMX ETH prices"}'
+
+# Call a tool directly
+curl -X POST https://solarplex-arbitrum-mcp-production.up.railway.app/invoke \
+  -H "Content-Type: application/json" \
+  -d '{"tool": "arbitrum_get_balance", "arguments": {"address": "0xE0DAD8AD88A1139323C90f0F3c6b2612Be9E1815"}}'
 ```
 
-## Available Tools (31 total)
-
-### Solana Tools (6)
-- `solana_get_balance` - Get Solana wallet balance
-- `solana_get_governance_state` - Get CredDAO governance state
-- `solana_create_proposal` - Create governance proposal
-- `solana_cast_vote` - Cast vote on proposal
-- `solana_get_fairscore` - Get FairScore for wallet
-- `solana_delegate` - Delegate voting power
-
-### Arbitrum Tools (7)
-- `arbitrum_register_agent` - Register on ERC-8004 registry
-- `arbitrum_get_balance` - Get Arbitrum ETH balance
-- `arbitrum_deploy_stylus` - Deploy Stylus (Rust) contract
-- `arbitrum_deploy_solidity` - Deploy Solidity contract
-- `arbitrum_read_contract` - Read from contract
-- `arbitrum_write_contract` - Write to contract
-- `arbitrum_bridge_assets` - Bridge assets
-
-### GMX Tools (6) - Arbitrum Ecosystem Integration
-- `gmx_get_prices` - Get current token prices from GMX oracle
-- `gmx_get_positions` - Get open positions for a wallet
-- `gmx_open_position` - Open a leveraged position on GMX V2
-- `gmx_close_position` - Close a position on GMX V2
-- `gmx_get_markets` - Get available markets (perps/spot)
-- `gmx_get_open_interest` - Get open interest for a market
-
-### Reputation Tools (4) - RepuLayer Bridge
-- `governance_get_cross_chain_reputation` - Unified reputation via RepuLayer
-- `governance_get_reputation_breakdown` - Detailed breakdown from all sources
-- `governance_compare_reputations` - Compare reputation between wallets
-- `governance_get_reputation_trend` - Score trend over time
-
-### Delegate Discovery Tools (4) - New
-- `governance_find_delegates` - Find delegates matching your interests
-- `governance_get_delegate_voting_history` - Get voting history for a delegate
-- `governance_calculate_delegation_efficiency` - Calculate delegation efficiency
-- `governance_suggest_delegation` - Suggest optimal delegation strategy
-
-### Governance Analytics Tools (4) - New
-- `governance_get_analytics` - Get governance analytics for a DAO
-- `governance_get_participation_rate` - Get voter participation rate
-- `governance_get_proposal_success_rate` - Get proposal success rate
-- `governance_generate_report` - Generate governance report
-
-### Governance Tools (6)
-- `governance_get_reputation` - Cross-chain reputation
-- `governance_get_tier` - Governance tier
-- `governance_calculate_voting_power` - Quadratic voting formula
-- `governance_get_proposal_status` - Proposal status
-- `governance_create_multichain_proposal` - Multi-chain proposal
-- `governance_get_delegation_efficiency` - Delegation efficiency
-
-## Installation
-
-### Option 1: npm (Recommended)
+### Install locally
 
 ```bash
 npm install -g solarplex-arbitrum-mcp
 ```
 
-### Option 2: From Source
+---
+
+## What This Is
+
+SolarPlex MCP is the **Arbitrum bridge** for the SolArPlex AI agent ecosystem. It connects AI agents to:
+
+- **Arbitrum chain** — read balances, deploy contracts, register identities (ERC-8004)
+- **GMX V2** — real-time prices, markets, open interest from the GMX oracle
+- **RepuLayer** — cross-chain reputation aggregation (CredDAO + TrustLend + RepuGate)
+- **6 chains total** — Solana, Arbitrum, Polygon, BSC, Ethereum, Base
+
+### Architecture
+
+```
+AI Agent (Claude, Cursor, etc.)
+         │
+         ▼
+┌─────────────────────────────────┐
+│   SolarPlex MCP Server (37)     │
+├──────────┬──────────┬───────────┤
+│ Solana   │ Arbitrum │ GMX V2    │
+│ (6 tools)│ (7 tools)│ (6 tools) │
+├──────────┴──────────┴───────────┤
+│  Reputation + Governance (18)   │
+└─────────────────────────────────┘
+         │
+    ┌────┼────────────┐
+    ▼    ▼            ▼
+  Solana  Arbitrum   GMX Oracle
+  RPC     + Sepolia  (live API)
+```
+
+---
+
+## All 37 Tools
+
+### Arbitrum (7) — Core chain interaction
+
+| Tool | Description |
+|------|-------------|
+| `arbitrum_register_agent` | Register on ERC-8004 identity registry (signed tx) |
+| `arbitrum_get_balance` | Get ETH balance (viem publicClient) |
+| `arbitrum_read_contract` | Read from any contract (viem readContract) |
+| `arbitrum_write_contract` | Write to contract (requires wallet signature) |
+| `arbitrum_deploy_stylus` | Deploy Stylus (Rust) contract |
+| `arbitrum_deploy_solidity` | Deploy Solidity contract |
+| `arbitrum_bridge_assets` | Bridge assets to/from Arbitrum |
+
+### GMX V2 (6) — Real-time DeFi data
+
+| Tool | Description |
+|------|-------------|
+| `gmx_get_prices` | Token prices from GMX oracle (live API) |
+| `gmx_get_positions` | Open positions for a wallet |
+| `gmx_open_position` | Open leveraged position (requires signature) |
+| `gmx_close_position` | Close position (requires signature) |
+| `gmx_get_markets` | Available markets (perps/spot) |
+| `gmx_get_open_interest` | Open interest per market |
+
+### Reputation (4) — RepuLayer cross-chain bridge
+
+| Tool | Description |
+|------|-------------|
+| `governance_get_cross_chain_reputation` | Unified reputation (Solana + Arbitrum) |
+| `governance_get_reputation_breakdown` | CredDAO + TrustLend + RepuGate breakdown |
+| `governance_compare_reputations` | Compare two wallets |
+| `governance_get_reputation_trend` | Score trend over N days |
+
+### Governance (6) — Quadratic voting + tiers
+
+| Tool | Description |
+|------|-------------|
+| `governance_get_reputation` | Cross-chain reputation score |
+| `governance_get_tier` | Governance tier (platinum/gold/silver/bronze) |
+| `governance_calculate_voting_power` | √(tokens) × (1 + fairscore/50) |
+| `governance_get_proposal_status` | Proposal status on-chain |
+| `governance_create_multichain_proposal` | Create on Solana + Arbitrum |
+| `governance_get_delegation_efficiency` | Delegation efficiency score |
+
+### Delegate Discovery (4)
+
+| Tool | Description |
+|------|-------------|
+| `governance_find_delegates` | Find delegates by interest |
+| `governance_get_delegate_voting_history` | Voting history per delegate |
+| `governance_calculate_delegation_efficiency` | Efficiency between delegator/delegate |
+| `governance_suggest_delegation` | Optimal delegation strategy |
+
+### Analytics (4)
+
+| Tool | Description |
+|------|-------------|
+| `governance_get_analytics` | DAO overview (members, proposals, votes) |
+| `governance_get_participation_rate` | Voter participation rate |
+| `governance_get_proposal_success_rate` | Proposal pass/fail stats |
+| `governance_generate_report` | Comprehensive governance report |
+
+### Solana (6)
+
+| Tool | Description |
+|------|-------------|
+| `solana_get_balance` | SOL balance |
+| `solana_get_governance_state` | CredDAO governance state |
+| `solana_create_proposal` | Create governance proposal |
+| `solana_cast_vote` | Cast vote |
+| `solana_get_fairscore` | FairScore for wallet |
+| `solana_delegate` | Delegate voting power |
+
+---
+
+## Live Demo: On-Chain Registration
+
+The `arbitrum_register_agent` tool performs a **real signed transaction** on Arbitrum Sepolia:
 
 ```bash
-# Clone the repo
-git clone https://github.com/pt-act/SolarPlex_Arbitrum-MCP.git
-cd SolarPlex_Arbitrum-MCP
-
-# Install dependencies
-npm install
-
-# Copy environment file
-cp .env.example .env
-
-# Edit .env with your QuickNode endpoints
-nano .env
-
-# Build
-npm run build
-
-# Run
-npm start
+curl -X POST https://solarplex-arbitrum-mcp-production.up.railway.app/invoke \
+  -H "Content-Type: application/json" \
+  -d '{"tool": "arbitrum_register_agent", "arguments": {"name": "SolarPlex", "description": "Multi-chain governance agent", "skills": ["code", "solana", "arbitrum", "governance"]}}'
 ```
+
+Returns:
+```json
+{
+  "status": "confirmed",
+  "transactionHash": "0x6803d227a2415a76fa464dec8490ac6dd189f0e399ea7c70d90457a4c3ee922c",
+  "explorerUrl": "https://sepolia.arbiscan.io/tx/0x6803d227a2415a76fa464dec8490ac6dd189f0e399ea7c70d90457a4c3ee922c"
+}
+```
+
+---
 
 ## Configuration
 
-Configure via `.env` file (see `.env.example`):
+### Environment Variables
 
-```bash
-# Solana
-SOLANA_RPC_URL=https://api.devnet.solana.com
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `ARBITRUM_RPC_URL` | Yes | Arbitrum One RPC endpoint |
+| `ARBITRUM_SEPOLIA_RPC_URL` | Yes | Arbitrum Sepolia RPC endpoint |
+| `AGENT_PRIVATE_KEY` | For writes | Wallet private key for signing transactions |
+| `QUICKNODE_API_KEY` | Optional | QuickNode API key |
+| `QUICKNODE_SOLANA_ENDPOINT` | Optional | Solana QuickNode endpoint |
+| `QUICKNODE_ARBITRUM_ENDPOINT` | Optional | Arbitrum QuickNode endpoint |
 
-# Arbitrum
-ARBITRUM_RPC_URL=https://your-arbitrum-endpoint.quiknode.pro/...
-ARBITRUM_SEPOLIA_RPC_URL=https://your-arbitrum-sepolia-endpoint.quiknode.pro/...
-
-# Polygon
-POLYGON_RPC_URL=https://your-polygon-endpoint.quiknode.pro/...
-
-# BSC
-BSC_RPC_URL=https://your-bsc-endpoint.quiknode.pro/...
-
-# Ethereum
-ETHEREUM_RPC_URL=https://your-ethereum-endpoint.quiknode.pro/...
-
-# Base
-BASE_RPC_URL=https://your-base-endpoint.quiknode.pro/...
-
-# QuickNode API Key
-QUICKNODE_API_KEY=your_api_key
-```
-
-## Usage with Claude
-
-### If installed via npm
+### Claude Desktop Config
 
 ```json
 {
@@ -191,62 +190,46 @@ QUICKNODE_API_KEY=your_api_key
     "solarplex": {
       "command": "solarplex-mcp",
       "env": {
-        "SOLANA_RPC_URL": "https://your-solana-endpoint.quiknode.pro/",
-        "ARBITRUM_RPC_URL": "https://your-arbitrum-endpoint.quiknode.pro/",
-        "POLYGON_RPC_URL": "https://your-polygon-endpoint.quiknode.pro/",
-        "BSC_RPC_URL": "https://your-bsc-endpoint.quiknode.pro/",
-        "ETHEREUM_RPC_URL": "https://your-ethereum-endpoint.quiknode.pro/",
-        "BASE_RPC_URL": "https://your-base-endpoint.quiknode.pro/"
+        "ARBITRUM_RPC_URL": "https://your-endpoint.quiknode.pro/...",
+        "ARBITRUM_SEPOLIA_RPC_URL": "https://your-sepolia-endpoint.quiknode.pro/..."
       }
     }
   }
 }
 ```
 
-### If built from source
+---
 
-```json
-{
-  "mcpServers": {
-    "solarplex": {
-      "command": "node",
-      "args": ["/path/to/solarplex-arbitrum-mcp/dist/index.js"],
-      "env": {
-        "SOLANA_RPC_URL": "https://your-solana-endpoint.quiknode.pro/",
-        "ARBITRUM_RPC_URL": "https://your-arbitrum-endpoint.quiknode.pro/",
-        "POLYGON_RPC_URL": "https://your-polygon-endpoint.quiknode.pro/",
-        "BSC_RPC_URL": "https://your-bsc-endpoint.quiknode.pro/",
-        "ETHEREUM_RPC_URL": "https://your-ethereum-endpoint.quiknode.pro/",
-        "BASE_RPC_URL": "https://your-base-endpoint.quiknode.pro/"
-      }
-    }
-  }
-}
-```
+## ArbiLink Agentic Bounty Compliance
 
-## Arbitrum Challenge Compliance
+| Requirement | Status |
+|-------------|--------|
+| Skill/MCP for AI ↔ Arbitrum | ✅ 37 tools across 6 chains |
+| Agent registered on ERC-8004 | ✅ Real signed tx on Arbitrum Sepolia |
+| Open source | ✅ Public GitHub repo |
+| Framework protected | ✅ Source in `src/`, only `dist/` published |
+| Published on npm | ✅ `solarplex-arbitrum-mcp` v1.2.0 |
+| ⭐ GMX integration | ✅ Live prices from GMX oracle API |
+| ⭐ Cross-chain reputation | ✅ RepuLayer bridge (CredDAO + TrustLend + RepuGate) |
+| ⭐ Delegate discovery | ✅ Interest-based matching with voting history |
+| ⭐ Governance analytics | ✅ DAO metrics, participation rates, reports |
+| ⭐ Live deployed agent | ✅ Railway HTTP endpoint |
 
-This MCP is designed for the ArbiLink Agentic Bounty:
-1. ✅ Agent registered on Arbitrum ERC-8004 identity registry
-2. ✅ MCP (not just skill) for flexible multi-chain operations
-3. ✅ Open source - built in public
-4. ✅ Framework stays protected - internal logic private
-5. ✅ Published on npm - community can install and use
-6. ⭐ GMX integration (Arbitrum ecosystem protocol)
-7. ⭐ Cross-chain reputation via RepuLayer
-8. ⭐ Delegate discovery based on voting history
-9. ⭐ Governance analytics for DAO operators
+---
 
-## Service Offerings
+## Ecosystem
 
-| Service | Price | Chain |
-|---------|-------|-------|
-| Anchor/Solana Development | 0.015 ETH | Solana |
-| Stylus/Rust Development | 0.018 ETH | Arbitrum |
-| Solidity Development | 0.015 ETH | Arbitrum |
-| Governance Architecture | 0.020 ETH | Both |
-| FairScore Integration | 0.012 ETH | Solana |
-| Security & Audits | 0.018 ETH | Both |
+Part of the **SolArPlex** multi-chain AI agent network:
+
+- **CredDAO** — Solana reputation-weighted governance
+- **TrustLend** — Under-collateralized lending via FairScore
+- **RepuGate** — Reputation-gated token launchpad
+- **RepuLayer** — Cross-chain reputation aggregation
+- **AgentxploiTor** — Autonomous security auditing
+
+**Roadmap:** 7-phase ecosystem from reputation building → full cross-chain launch. See [solar-plex.netlify.app](https://solar-plex.netlify.app) for details.
+
+---
 
 ## License
 
