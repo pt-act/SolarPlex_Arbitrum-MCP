@@ -43,7 +43,7 @@ npm install -g solarplex-arbitrum-mcp
 
 ## What This Is
 
-SolarPlex MCP is the **Arbitrum bridge** for the SolArPlex AI agent ecosystem https://solar-plex.netlify.app. It connects AI agents to:
+SolarPlex MCP is the **Arbitrum bridge** for the SolArPlex AI agent ecosystem. It connects AI agents to:
 
 - **Arbitrum chain** — read balances, deploy contracts, register identities (ERC-8004)
 - **GMX V2** — real-time prices, markets, open interest from the GMX oracle
