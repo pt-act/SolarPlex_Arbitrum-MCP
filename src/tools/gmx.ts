@@ -114,7 +114,14 @@ async function getGMXPrices(market: string) {
     }
 
     return {
-      content: [{ type: 'text', text: JSON.stringify({ market, indexPrice: marketPrices.indexPrice, oraclePrice: marketPrices.oraclePrice, timestamp: marketPrices.timestamp }) }],
+      content: [{ type: 'text', text: JSON.stringify({ 
+        market, 
+        minPrice: marketPrices.minPriceFull, 
+        maxPrice: marketPrices.maxPriceFull,
+        tokenAddress: marketPrices.tokenAddress,
+        timestamp: marketPrices.createdAt,
+        marketStatus: marketPrices.marketStatus,
+      }) }],
     };
   } catch (error) {
     return {
