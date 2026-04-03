@@ -231,6 +231,53 @@ Part of the **SolArPlex** multi-chain AI agent network:
 
 ---
 
+## Security FAQ
+
+### How are private keys handled?
+
+Private keys are **never stored, logged, or transmitted**. The `AGENT_PRIVATE_KEY` environment variable is read into memory at runtime only when a write operation is requested. It is used solely to derive a viem `WalletClient` for signing — the key itself never leaves the server process.
+
+### What is the threat model?
+
+| Threat | Mitigation |
+|--------|-----------|
+| Key extraction from disk | Key is env-only, never written to disk |
+| Unauthorized writes | Rate limited to 5 writes/minute, network allowlist |
+| Mainnet exploits | Mainnet writes explicitly blocked — only Sepolia allowed |
+| Replay attacks | Each transaction uses unique nonce from chain |
+| Key leakage in logs | Operation logging records tx hash, never the key |
+| Compromised server | Ephemeral keys available for session-only operations |
+
+### Can I use this without exposing my private key?
+
+Yes. Three options:
+
+1. **Read-only mode** — Don't set `AGENT_PRIVATE_KEY`. All read tools (balance, GMX prices, reputation, governance) work without signing.
+2. **Ephemeral keys** — Call `arbitrum_generate_ephemeral_key` to create a temporary session key that is never persisted.
+3. **Dry-run mode** — Add `"dryRun": true` to any write tool to see the exact transaction data without executing.
+
+### What networks are allowed for writes?
+
+Only **Arbitrum Sepolia** (testnet). Mainnet writes are explicitly blocked in the security layer. This prevents accidental or malicious mainnet transactions.
+
+### How does rate limiting work?
+
+Write operations are limited to **5 per minute** per server instance. If exceeded, the API returns a `429`-style response with `retryAfter` seconds. This prevents abuse if the endpoint is exposed publicly.
+
+### Is the HTTP endpoint authenticated?
+
+The public Railway endpoint is open for demo purposes. For production use, add your own authentication layer (API key, JWT, etc.) in front of the MCP server. The security layer protects against write abuse regardless.
+
+### Can I audit the code?
+
+Yes — full source is public at [github.com/pt-act/SolarPlex_Arbitrum-MCP](https://github.com/pt-act/SolarPlex_Arbitrum-MCP). The security module is in `src/security.ts`.
+
+### How do I verify the published build matches the source?
+
+See [RELEASE-v1.2.0.md](./RELEASE-v1.2.0.md) for SHA256 checksums and reproducible build instructions.
+
+---
+
 ## License
 
 MIT
