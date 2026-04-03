@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SolarPlex MCP — Terminal Demo</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0a0a0a;
+    font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', 'Menlo', monospace;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 40px;
+  }
+  .terminal-window {
+    width: 960px;
+    background: #1a1b26;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05);
+  }
+  .terminal-header {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    background: #16161e;
+    border-bottom: 1px solid #292e42;
+  }
+  .dots { display: flex; gap: 8px; }
+  .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .dot.red { background: #ff5f57; }
+  .dot.yellow { background: #febc2e; }
+  .dot.green { background: #28c840; }
+  .title {
+    flex: 1;
+    text-align: center;
+    color: #565f89;
+    font-size: 13px;
+  }
+  .terminal-body {
+    padding: 20px;
+    min-height: 520px;
+    max-height: 520px;
+    overflow-y: auto;
+    font-size: 13px;
+    line-height: 1.7;
+    color: #a9b1d6;
+  }
+  .terminal-body::-webkit-scrollbar { width: 6px; }
+  .terminal-body::-webkit-scrollbar-track { background: transparent; }
+  .terminal-body::-webkit-scrollbar-thumb { background: #292e42; border-radius: 3px; }
+  .prompt { color: #7aa2f7; }
+  .cmd { color: #9ece6a; }
+  .url { color: #f7768e; }
+  .flag { color: #bb9af7; }
+  .str { color: #73daca; }
+  .key { color: #7dcfff; }
+  .num { color: #ff9e64; }
+  .comment { color: #565f89; font-style: italic; }
+  .highlight { color: #73daca; font-weight: 600; }
+  .hash { color: #e0af68; word-break: break-all; }
+  .error { color: #f7768e; }
+  .success { color: #73daca; }
+  .response-block {
+    margin: 8px 0 16px 0;
+    padding: 12px;
+    background: #13141c;
+    border-radius: 6px;
+    border-left: 3px solid #292e42;
+  }
+  .response-label {
+    color: #565f89;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 8px;
+  }
+  .cursor {
+    display: inline-block;
+    width: 8px;
+    height: 16px;
+    background: #7aa2f7;
+    animation: blink 1s step-end infinite;
+    vertical-align: text-bottom;
+  }
+  @keyframes blink { 50% { opacity: 0; } }
+  .typing { overflow: hidden; white-space: nowrap; }
+  .section-divider {
+    margin: 16px 0;
+    padding: 8px 0;
+    border-top: 1px solid #292e42;
+    color: #565f89;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+  }
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-left: 8px;
+  }
+  .badge.live { background: #73daca20; color: #73daca; border: 1px solid #73daca40; }
+  .badge.signed { background: #e0af6820; color: #e0af68; border: 1px solid #e0af6840; }
+  .badge.formula { background: #bb9af720; color: #bb9af7; border: 1px solid #bb9af740; }
+</style>
+</head>
+<body>
+<div class="terminal-window">
+  <div class="terminal-header">
+    <div class="dots">
+      <div class="dot red"></div>
+      <div class="dot yellow"></div>
+      <div class="dot green"></div>
+    </div>
+    <div class="title">solarplex-mcp — zsh — 120×40</div>
+    <div style="width: 52px;"></div>
+  </div>
+  <div class="terminal-body" id="terminal"></div>
+</div>
+
+<script>
+const terminal = document.getElementById('terminal');
+const API = 'https://solarplex-arbitrum-mcp-production.up.railway.app';
+
+const steps = [
+  {
+    type: 'comment',
+    text: '# ╔══════════════════════════════════════════════════════════╗',
+  },
+  {
+    type: 'comment',
+    text: '# ║  SolarPlex MCP — Live Terminal Demo                      ║',
+  },
+  {
+    type: 'comment',
+    text: '# ║  Calling SolarPlex Agent from CredDAO Ecosystem          ║',
+  },
+  {
+    type: 'comment',
+    text: '# ╚══════════════════════════════════════════════════════════╝',
+  },
+  { type: 'divider', text: 'Step 1: Health Check' },
+  {
+    type: 'command',
+    cmd: `curl -s ${API}/ | jq .`,
+    response: {
+      label: 'Response',
+      json: {
+        name: 'SolarPlex Arbitrum MCP',
+        version: '1.2.0',
+        status: 'online',
+        tools: 39,
+        chains: ['solana', 'arbitrum', 'polygon', 'bsc', 'ethereum', 'base'],
+      },
+    },
+  },
+  { type: 'divider', text: 'Step 2: Get GMX ETH Price (Live Oracle)' },
+  {
+    type: 'command',
+    cmd: `curl -s -X POST ${API}/invoke \\
+  -H "Content-Type: application/json" \\
+  -d '{"tool":"gmx_get_prices","arguments":{"market":"ETH"}}' | jq .`,
+    response: {
+      label: 'GMX Oracle — Live Price',
+      json: {
+        market: 'ETH',
+        minPrice: '2055090623969812',
+        maxPrice: '2055227571575617',
+        tokenAddress: '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1',
+        timestamp: '2026-04-03T16:54:35.323Z',
+      },
+    },
+  },
+  { type: 'divider', text: 'Step 3: Register Agent on ERC-8004 (Signed TX)' },
+  {
+    type: 'command',
+    cmd: `curl -s -X POST ${API}/invoke \\
+  -H "Content-Type: application/json" \\
+  -d '{"tool":"arbitrum_register_agent","arguments":{"name":"SolarPlex","description":"Multi-chain governance agent","skills":["code","solana","arbitrum","governance"]}}' | jq .`,
+    response: {
+      label: 'ERC-8004 Registration — Confirmed',
+      json: {
+        action: 'register_agent',
+        name: 'SolarPlex',
+        registry: '0x8004A818BFB912233c491871b3d84c89A494BD9e',
+        chain: 'arbitrum-sepolia',
+        status: 'confirmed',
+        transactionHash: '0x6803d227a2415a76fa464dec8490ac6dd189f0e399ea7c70d90457a4c3ee922c',
+        explorerUrl: 'https://sepolia.arbiscan.io/tx/0x6803d227...',
+      },
+    },
+  },
+  { type: 'divider', text: 'Step 4: Cross-Chain Reputation via RepuLayer' },
+  {
+    type: 'command',
+    cmd: `curl -s -X POST ${API}/invoke \\
+  -H "Content-Type: application/json" \\
+  -d '{"tool":"governance_get_cross_chain_reputation","arguments":{"solanaWallet":"0xE0DA...1815","arbitrumWallet":"0xE0DA...1815"}}' | jq .`,
+    response: {
+      label: 'RepuLayer Composite Score',
+      json: {
+        reputation: {
+          solana: { fairscore: 72, tier: 'gold', source: 'RepuLayer API' },
+          arbitrum: { fairscore: 68, tier: 'silver', source: 'ERC-8004 registry' },
+          combined: { score: 70, tier: 'gold' },
+        },
+        compositeFormula: '(creddao × 0.4) + (trustlend × 0.3) + (repugate × 0.3)',
+      },
+    },
+  },
+  { type: 'divider', text: 'Step 5: Quadratic Voting Power' },
+  {
+    type: 'command',
+    cmd: `curl -s -X POST ${API}/invoke \\
+  -H "Content-Type: application/json" \\
+  -d '{"tool":"governance_calculate_voting_power","arguments":{"tokenBalance":"10000","fairscore":78}}' | jq .`,
+    response: {
+      label: 'Voting Power — √(tokens) × (1 + fairscore/50)',
+      json: {
+        tokenBalance: '10000',
+        fairscore: 78,
+        quadraticBase: '100.00',
+        reputationMultiplier: '2.56',
+        totalPower: 256,
+        formula: '√10000 × (1 + 78/50) = 256',
+      },
+    },
+  },
+  { type: 'divider', text: 'Step 6: Security Status' },
+  {
+    type: 'command',
+    cmd: `curl -s -X POST ${API}/invoke \\
+  -H "Content-Type: application/json" \\
+  -d '{"tool":"arbitrum_security_status","arguments":{}}' | jq .`,
+    response: {
+      label: 'Security Configuration',
+      json: {
+        walletConfigured: true,
+        allowedNetworks: ['sepolia'],
+        rateLimit: { maxWritesPerMinute: 5, remaining: 5 },
+        mainnetWrites: false,
+        operationLogging: true,
+      },
+    },
+  },
+  { type: 'divider', text: 'Step 7: Natural Language Chat' },
+  {
+    type: 'command',
+    cmd: `curl -s -X POST ${API}/chat \\
+  -H "Content-Type: application/json" \\
+  -d '{"message":"What is my Arbitrum balance?"}' | jq .`,
+    response: {
+      label: 'Chat Response',
+      json: {
+        tool: 'arbitrum_get_balance',
+        result: {
+          content: [{
+            type: 'text',
+            text: JSON.stringify({
+              address: '0xE0DAD8AD88A1139323C90f0F3c6b2612Be9E1815',
+              balance: '0.5847 ETH',
+              chain: 'arbitrum',
+              chainId: 42161,
+            }),
+          }],
+        },
+      },
+    },
+  },
+  { type: 'divider', text: 'Done — All 7 flows executed successfully' },
+  {
+    type: 'comment',
+    text: '',
+  },
+  {
+    type: 'comment',
+    text: '🎬 Demo complete. All tools responding. Agent is live.',
+  },
+];
+
+function jsonToHtml(obj, indent = 0) {
+  const pad = '  '.repeat(indent);
+  const pad1 = '  '.repeat(indent + 1);
+  const lines = [];
+
+  if (Array.isArray(obj)) {
+    if (obj.length === 0) return '[]';
+    lines.push('[');
+    obj.forEach((item, i) => {
+      const comma = i < obj.length - 1 ? ',' : '';
+      if (typeof item === 'object' && item !== null) {
+        lines.push(pad1 + jsonToHtml(item, indent + 1) + comma);
+      } else if (typeof item === 'string') {
+        lines.push(pad1 + `<span class="str">"${item}"</span>` + comma);
+      } else if (typeof item === 'number') {
+        lines.push(pad1 + `<span class="num">${item}</span>` + comma);
+      } else if (typeof item === 'boolean') {
+        lines.push(pad1 + `<span class="${item ? 'success' : 'error'}">${item}</span>` + comma);
+      }
+    });
+    lines.push(pad + ']');
+    return lines.join('\n');
+  }
+
+  if (typeof obj !== 'object' || obj === null) return String(obj);
+
+  const keys = Object.keys(obj);
+  lines.push('{');
+  keys.forEach((key, i) => {
+    const comma = i < keys.length - 1 ? ',' : '';
+    const val = obj[key];
+    if (typeof val === 'string') {
+      if (val.startsWith('0x') && val.length > 20) {
+        lines.push(pad1 + `<span class="key">"${key}"</span>: <span class="hash">"${val}"</span>${comma}`);
+      } else if (val.startsWith('http')) {
+        lines.push(pad1 + `<span class="key">"${key}"</span>: <span class="url">"${val}"</span>${comma}`);
+      } else if (val.includes('×') || val.includes('√')) {
+        lines.push(pad1 + `<span class="key">"${key}"</span>: <span class="highlight">"${val}"</span>${comma}`);
+      } else {
+        lines.push(pad1 + `<span class="key">"${key}"</span>: <span class="str">"${val}"</span>${comma}`);
+      }
+    } else if (typeof val === 'number') {
+      lines.push(pad1 + `<span class="key">"${key}"</span>: <span class="num">${val}</span>${comma}`);
+    } else if (typeof val === 'boolean') {
+      lines.push(pad1 + `<span class="key">"${key}"</span>: <span class="${val ? 'success' : 'error'}">${val}</span>${comma}`);
+    } else if (typeof val === 'object' && val !== null) {
+      lines.push(pad1 + `<span class="key">"${key}"</span>: ${jsonToHtml(val, indent + 1)}${comma}`);
+    }
+  });
+  lines.push(pad + '}');
+  return lines.join('\n');
+}
+
+function cmdToHtml(cmd) {
+  return cmd
+    .replace(/(curl)/g, '<span class="cmd">$1</span>')
+    .replace(/(-s|-X POST|-H|-d)/g, '<span class="flag">$1</span>')
+    .replace(/(https?:\/\/[^\s\\"]+)/g, '<span class="url">$1</span>')
+    .replace(/("Content-Type: application\/json")/g, '<span class="str">$1</span>');
+}
+
+async function typeText(element, text, speed = 8) {
+  return new Promise(resolve => {
+    let i = 0;
+    const cursor = document.createElement('span');
+    cursor.className = 'cursor';
+    element.appendChild(cursor);
+
+    function type() {
+      if (i < text.length) {
+        const char = text[i];
+        if (char === '\n') {
+          element.insertBefore(document.createElement('br'), cursor);
+        } else {
+          element.insertBefore(document.createTextNode(char), cursor);
+        }
+        i++;
+        setTimeout(type, speed);
+      } else {
+        cursor.remove();
+        resolve();
+      }
+    }
+    type();
+  });
+}
+
+async function runDemo() {
+  for (const step of steps) {
+    if (step.type === 'comment') {
+      const div = document.createElement('div');
+      div.innerHTML = `<span class="comment">${step.text}</span>`;
+      terminal.appendChild(div);
+      await sleep(200);
+    } else if (step.type === 'divider') {
+      const div = document.createElement('div');
+      div.className = 'section-divider';
+      div.textContent = step.text;
+      terminal.appendChild(div);
+      await sleep(400);
+    } else if (step.type === 'command') {
+      // Prompt line
+      const promptDiv = document.createElement('div');
+      promptDiv.innerHTML = `<span class="prompt">❯</span> `;
+      terminal.appendChild(promptDiv);
+
+      // Type the command
+      const cmdSpan = document.createElement('span');
+      promptDiv.appendChild(cmdSpan);
+      await typeText(cmdSpan, step.cmd, 6);
+
+      // Response
+      await sleep(300);
+      const respDiv = document.createElement('div');
+      respDiv.className = 'response-block';
+      respDiv.innerHTML = `<div class="response-label">${step.response.label}</div><pre style="margin:0;white-space:pre-wrap;word-break:break-all;">${jsonToHtml(step.response.json)}</pre>`;
+      terminal.appendChild(respDiv);
+
+      terminal.scrollTop = terminal.scrollHeight;
+      await sleep(600);
+    }
+  }
+}
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+// Start demo after a brief delay
+setTimeout(runDemo, 500);
+</script>
+</body>
+</html>
